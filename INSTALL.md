@@ -114,7 +114,7 @@ Then:
 2. Click the Hammerspoon icon → **Reload Config**. The puppets come back where they were, with your menu choices.
 3. Start new Claude Code sessions.
 
-**Installed before version 0.9.0?** Back then the Spoon was copied and the hook lived in `~/.claude-puppet/hook.sh`. After the `git pull`, switch to the linked layout once, then do the three steps above:
+**Do you have a `~/.claude-puppet/hook.sh`?** Then you installed the older layout, where the Spoon was copied. After the `git pull`, switch to the linked layout once, then do the three steps above:
 
 ```sh
 rm -rf ~/.hammerspoon/Spoons/ClaudePuppet.spoon ~/.claude-puppet/hook.sh
