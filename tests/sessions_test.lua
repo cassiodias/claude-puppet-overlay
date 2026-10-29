@@ -43,4 +43,29 @@ check("done says the reply", intents[1] and intents[1].text == "Built it. ✓")
 check("the puppet stays on stage", sessions:stageKeys(100)[1] == "s1")
 check("and leaves after hours of silence", sessions:stageKeys(100 + 3 * 60 * 60)[1] == "home")
 
+-- A message sent while a command's turn runs belongs to that work.
+local busy = Sessions.new(100)
+local function on(name, fields) return busy:apply(event(name, fields), { mapping = mapping, harness = fake, frame = 1, now = 100 }) end
+on("UserPromptSubmit", { text = "/build" })
+on("PreToolUse", { tool = "edit" })
+on("UserPromptSubmit", { text = "also rename the file" })
+check("a message during a running command keeps the command", busy.all.s1.command == "build")
+check("and its animation", Sessions.sceneFor(busy.all.s1, mapping) == "code")
+on("Stop", { text = "Built." })
+on("UserPromptSubmit", { text = "thanks" })
+check("once the session is idle, a message is the main conversation", busy.all.s1.command == nil)
+
+-- Wake-up prompts while background subagents of a command still work keep it too.
+on("UserPromptSubmit", { text = "/review" })
+on("SubagentStart", { agentId = "a1", agentType = "lens" })
+on("SubagentStart", { agentId = "a2", agentType = "lens" })
+on("Stop", { text = "Both reviewers are running." })
+on("UserPromptSubmit", { text = "" })
+on("SubagentStop", { agentId = "a1" })
+check("a prompt while subagents run keeps the command", busy.all.s1.command == "review")
+check("and its subagents", #busy.all.s1.order == 2)
+check("so ping pong goes on", Sessions.sceneFor(busy.all.s1, mapping) == "pingpong")
+on("UserPromptSubmit", { text = "/build" })
+check("a new /command always wins", busy.all.s1.command == "build" and #busy.all.s1.order == 0)
+
 check.done("sessions")

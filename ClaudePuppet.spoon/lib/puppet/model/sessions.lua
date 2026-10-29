@@ -105,10 +105,17 @@ function Sessions:apply(e, ctx)
   local function say(text, seconds) intents[#intents + 1] = { key = sid, text = text, seconds = seconds } end
 
   if e.name == "UserPromptSubmit" then
-    s.agents, s.order, s.score, s.isWorking, s.test, s.summary = {}, {}, 0, true, nil, ""
-    s.command = e.text:match("^/(%S+)")
-    s.isListed = mapping:choiceFor(s.command) ~= "off"
-    s.tag = e.text ~= "" and e.text:gsub("^/", "") or s.folder
+    local command = e.text:match("^/(%S+)")
+    -- A message without a /command while the session is still busy (its turn running, or subagents it
+    -- started still working) belongs to that work: it keeps the command, its animation and its subagents.
+    -- Otherwise it starts a new turn.
+    if command or not (s.isWorking or liveAgents(s) > 0) then
+      s.agents, s.order, s.score, s.test, s.summary = {}, {}, 0, nil, ""
+      s.command = command
+      s.isListed = mapping:choiceFor(s.command) ~= "off"
+      s.tag = e.text ~= "" and e.text:gsub("^/", "") or s.folder
+    end
+    s.isWorking = true
     s.mood = "thinking"
     say(nil)
   elseif e.name == "PreToolUse" then
