@@ -14,6 +14,20 @@ Claude puppets that float over your Mac desktop, like the old Office paperclip, 
 | done | says the first sentence of Claude's answer, like "Fixed the parser and added two tests. ✓" |
 | between turns | rests at its desk with the monitor off, and dozes off after a while |
 
+## What it looks like
+
+| | |
+| --- | --- |
+| ![The puppet codes at its laptop and shoots an invader with every tool call](docs/images/coding.png) | **Coding.** It types on its laptop and shoots an invader on its monitor with every tool call. The tag says which command it runs and in which tab. |
+| ![The same desk with green Matrix rain on the monitor](docs/images/planning.png) | **Matrix.** The same desk with green code rain, which pours faster with each tool call. |
+| ![Two puppets playing ping pong, one per subagent](docs/images/ping-pong.png) | **Ping pong.** One puppet per subagent, each scoring its own tool calls. |
+| ![The puppet holds up a Bash? sign and asks May I use Bash?](docs/images/bash-may-I-use-bash.png) | **Waiting for a permission.** It holds up the tool's name and asks. |
+| ![A bubble with the first sentence of Claude's answer](docs/images/response-coder.png) | **Done.** The bubble says the first sentence of Claude's answer. |
+| ![Three puppets side by side: Matrix, ping pong and coding](docs/images/planner-reviewer-ping-pong-coding.png) | **Several sessions.** One puppet per busy session, each in its own colour and scene. |
+| ![Three puppets with Done bubbles](docs/images/3-desk-done.png) | **All done.** Each session says so above its own puppet. |
+| ![Three puppets dozing at their desks, monitors off](docs/images/3-desks-sleeping.png) | **Between turns.** Each puppet rests at its desk, monitor off, and dozes off. |
+| ![A single puppet waiting on an empty table](docs/images/big-desk.png) | **Nothing running.** One puppet waits at home. |
+
 - **One puppet per session:** with one tab coding and another reviewing, two puppets sit side by side, each in its own colour, with a name tag (the command you ran, or the project folder), its own scene and its own bubble. Between turns a puppet rests at its desk with the monitor off, and dozes; it leaves when its session ends or its iTerm tab closes. With no session on stage, one puppet waits at home.
 - **Choose what plays** from the `▟▙` menu bar icon (or Option-click a puppet): list `my-coding-skill` under Coder, `my-planner` under Matrix and `my-reviewer` under Ping pong, and set the main conversation to Coder, Matrix, auto or Off. Each tab's puppet follows the command that tab runs.
 - **Click a puppet** (or its bubble) to jump to the terminal running that session. In iTerm2 it selects the exact window and tab, and the tab number is written under the puppet's table (`tab 3`, or `window 2 · tab 3` with several windows).
