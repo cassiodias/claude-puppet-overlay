@@ -1,0 +1,709 @@
+== nothing yet: the home puppet
+  puppet 1: home at 1208,764 colour #D97757 bubble: -
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                    ccccccc                     |
+  |                    ckcccck                     |
+  |                   ccccccccc                    |
+  |                    ccccccc                     |
+  |                    c c c c                     |
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  texts: 
+== tab1 thinks
+  puppet 1: tab1 at 1208,764 colour #D97757 bubble: -
+  |                                                |
+  |                 gggggggggggggggggggggggggggggg |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g:::vvv:::vvv:::vvv:::vvv::::g |
+  |           ww    g::v:v:v:v:v:v:v:v:v:v:v:v:::g |
+  |                 g:::v:v:::v:v:::v:v:::v:v::::g |
+  |          w      g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |   ccccc         g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  cccccccc    g  g::::::::::::::::::::::::::::g |
+  |  cccccccc    g  g:::::c::::::::::::::::::::::g |
+  |  ccccccc     g  g:::ccccc::::::::::::::::::::g |
+  |  cccccccgggggg  g::::::::::::::::::::::::::::g |
+  |  ccccccc        gggggggggggggggggggggggggggggg |
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  texts: .. / 00000 / dev-skill CON-1
+== tab1 codes, a shot flies
+  puppet 1: tab1 at 1208,764 colour #D97757 bubble: -
+  |                                                |
+  |                 gggggggggggggggggggggggggggggg |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g:::vvv:::vvv:::vvv:::vvv::::g |
+  |                 g::v:v:v:v:v:v:v:v:v:v:v:v:::g |
+  |                 g::v:::v:v:::v:v:w:v:v:::v:::g |
+  |                 g::::::::::::::::w:::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |   ccccc         g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::c:::::::::::g |
+  |  ccccccccc   g  g::::::::::::::ccccc:::::::::g |
+  |  cccccccgggggg  g::::::::::::::::::::::::::::g |
+  |  ccccccc        gggggggggggggggggggggggggggggg |
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  texts: 00001 / dev-skill CON-1
+== tab1 codes, the invader explodes
+  puppet 1: tab1 at 1208,764 colour #D97757 bubble: -
+  |                                                |
+  |                 gggggggggggggggggggggggggggggg |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::vvv:::vvv:::::::::vvv:::g |
+  |                 g:::v:v:v:v:v:v:::::::v:v:v::g |
+  |                 g:::v:::v:v:::v:::::::v:::v::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |   ccccc         g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g:::::::::c::::::::::::::::::g |
+  |  ccccccccc   g  g:::::::ccccc::::::::::::::::g |
+  |  cccccccgggggg  g::::::::::::::::::::::::::::g |
+  |  ccccccc        gggggggggggggggggggggggggggggg |
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  texts: 00001 / dev-skill CON-1
+== tab1 reads
+  puppet 1: tab1 at 1208,764 colour #D97757 bubble: -
+  |                                                |
+  |                 gggggggggggggggggggggggggggggg |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::www:::::::g |
+  |                 g:::::::::::::::::w:::w::::::g |
+  |                 g:::::::::::::::::w:::w::::::g |
+  |                 g::::::::::::::::::www:::::::g |
+  |   ccccc         g:::::::::::::::::::::g::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::g:::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  ccccccccc   g  g::::::::::::::::::::::::::::g |
+  |  cccccccgggggg  g::::::::::::::::::::::::::::g |
+  |  ccccccc        gggggggggggggggggggggggggggggg |
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  texts: 00001 / dev-skill CON-1
+== tab1 runs tests
+  puppet 1: tab1 at 1208,764 colour #D97757 bubble: -
+  |                                                |
+  |                 gggggggggggggggggggggggggggggg |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g:::yyyyyyyyyygggggggggggg:::g |
+  |   ccccc         g:::yyyyyyyyyygggggggggggg:::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  cccccccgggggg  g::::::::::::::::::::::::::::g |
+  |  ccccccc        gggggggggggggggggggggggggggggg |
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  texts: 00001 / tests / dev-skill CON-1
+== tab1 tests failed
+  puppet 1: tab1 at 1208,764 colour #D97757 bubble: -
+  |                                                |
+  |                 gggggggggggggggggggggggggggggg |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g:::::::::::x:::x::::::::::::g |
+  |                 g::::::::::::x:x:::::::::::::g |
+  |                 g:::::::::::::x::::::::::::::g |
+  |   ccccc         g::::::::::::x:x:::::::::::::g |
+  |  ccccccc     g  g:::::::::::x:::x::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  cccccccgggggg  g::::::::::::::::::::::::::::g |
+  |  ccccccc        gggggggggggggggggggggggggggggg |
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  texts: 00001 / dev-skill CON-1
+== tab1 asks permission
+  puppet 1: tab1 at 1208,764 colour #D97757 bubble: May I use Bash?
+  |                                                |
+  | wwwwwwwwwwwwwww gggggggggggggggggggggggggggggg |
+  | wwwwwwwwwwwwwww g::::::::::::::::::::::::::::g |
+  | wwwwwwwwwwwwwww g::::::::::::::::::::::::::::g |
+  | wwwwwwwwwwwwwww g::::::::::::::::::::::::::::g |
+  | wwwwwwwwwwwwwww g::::::::::::::::::::::::::::g |
+  | wwwwwwwwwwwwwww g::::::::::::::::::::::::::::g |
+  |         b       g:::::::::::x:::x::::::::::::g |
+  |         b       g::::::::::::x:x:::::::::::::g |
+  |         b       g:::::::::::::x::::::::::::::g |
+  |   ccccc b       g::::::::::::x:x:::::::::::::g |
+  |  cccccccb    g  g:::::::::::x:::x::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  cccccccgggggg  g::::::::::::::::::::::::::::g |
+  |  ccccccc        gggggggggggggggggggggggggggggg |
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  texts: Bash? / 00001 / dev-skill CON-1
+== tab1 has a question
+  puppet 1: tab1 at 1208,764 colour #D97757 bubble: I have a question for you
+  |                                                |
+  |                 gggggggggggggggggggggggggggggg |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |        ccc      g::::::::::::::::::::::::::::g |
+  |        ccc      g::::::::::::::::::::::::::::g |
+  |         c       g::::::::::::::::::::::::::::g |
+  |         c       g:::::::::::x:::x::::::::::::g |
+  |         c       g::::::::::::x:x:::::::::::::g |
+  |         c       g:::::::::::::x::::::::::::::g |
+  |   ccccc c       g::::::::::::x:x:::::::::::::g |
+  |  cccccccc    g  g:::::::::::x:::x::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  cccccccgggggg  g::::::::::::::::::::::::::::g |
+  |  ccccccc        gggggggggggggggggggggggggggggg |
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  texts: 00002 / dev-skill CON-1
+== tab2 plays ping pong, tabs known
+  puppet 1: tab1 at 1208,764 colour #D97757 bubble: I have a question for you
+  |                                                |
+  |                 gggggggggggggggggggggggggggggg |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |        ccc      g::::::::::::::::::::::::::::g |
+  |        ccc      g:::::::::vvv:::::::::vvv::::g |
+  |         c       g::::::::v:v:v:::::::v:v:v:::g |
+  |         c       g:::::::::v:v:::::::::v:v::::g |
+  |         c       g::::::::::::::::::::::::::::g |
+  |         c       g::::::::::::::::::::::::::::g |
+  |   ccccc c       g::::::::::::::::::::::::::::g |
+  |  cccccccc    g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::c:::::::::::g |
+  |  ccccccc     g  g::::::::::::::ccccc:::::::::g |
+  |  cccccccgggggg  g::::::::::::::::::::::::::::g |
+  |  ccccccc        gggggggggggggggggggggggggggggg |
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  texts: 00002 / dev-skill CON-1 · tab 1
+  puppet 2: tab2 at 1004,764 colour #5B8DEF bubble: -
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                  w                             |
+  |                                                |
+  |                                                |
+  | uuuuuuu w                            w uuuuuuu |
+  | ukuuuuk w              w             w ukuuuuk |
+  |uuuuuuuuuw              w             wuuuuuuuuu|
+  | uuuuuuu                w               uuuuuuu |
+  | u u u u  tttttttttttttttttttttttttttt  u u u u |
+  |          tttttttttttttttttttttttttttt          |
+  |            g                      g            |
+  |            g                      g            |
+  |            g                      g            |
+  |            g                      g            |
+  |            g                      g            |
+  texts: contract 1 / break 1 / qa CON-1 · tab 2
+== tab3 watches the Matrix rain
+  puppet 1: tab1 at 1208,764 colour #D97757 bubble: I have a question for you
+  |                                                |
+  |                 gggggggggggggggggggggggggggggg |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |        ccc      g::::::::::::::::::::::::::::g |
+  |        ccc      g::::::::vvv:::::::::vvv:::::g |
+  |         c       g:::::::v:v:v:::::::v:v:v::::g |
+  |         c       g::::::::v:v:::::::::v:v:::::g |
+  |         c       g::::::::::::::::::::::::::::g |
+  |         c       g::::::::::::::::::::::::::::g |
+  |   ccccc c       g::::::::::::::::::::::::::::g |
+  |  cccccccc    g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g:::::::::::::c::::::::::::::g |
+  |  ccccccc     g  g:::::::::::ccccc::::::::::::g |
+  |  cccccccgggggg  g::::::::::::::::::::::::::::g |
+  |  ccccccc        gggggggggggggggggggggggggggggg |
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  texts: 00002 / dev-skill CON-1 · tab 1
+  puppet 2: tab2 at 1004,764 colour #5B8DEF bubble: -
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                       w                        |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  | uuuuuuu w                            w uuuuuuu |
+  | ukuuuuk w              w             w ukuuuuk |
+  |uuuuuuuuuw              w             wuuuuuuuuu|
+  | uuuuuuu                w               uuuuuuu |
+  | u u u u  tttttttttttttttttttttttttttt  u u u u |
+  |          tttttttttttttttttttttttttttt          |
+  |            g                      g            |
+  |            g                      g            |
+  |            g                      g            |
+  |            g                      g            |
+  |            g                      g            |
+  texts: contract 1 / break 1 / qa CON-1 · tab 2
+  puppet 3: tab3 at 800,764 colour #A06CD5 bubble: -
+  |                                                |
+  |                 gggggggggggggggggggggggggggggg |
+  |                 gn:n:::::::.:n:.:::::.:::::::g |
+  |                 gM:n:::M:::.:M:::n:::n:::::::g |
+  |                 g::::::::::n:::n:n:::n:::.:::g |
+  |                 g::n:.:::::::::n:M:::::.:.:::g |
+  |                 g::M:n:::::n:::n:::::n:n:.:::g |
+  |                 g::::n:::::n:::n:::::n:n:n:::g |
+  |                 g::::::::::n:::M:::::M:n:::::g |
+  |                 g::::M:::::M:::::::::::M:n:::g |
+  |   ppppp         g::::::::::::::::::::::::n:::g |
+  |  ppppppp     g  g::::::::::::::::::::::::n:.:g |
+  |  ppppppk     g  g::::::::::::::::::::::::M:::g |
+  |  ppppppk     g  g::::::::::::::::::::::::::n:g |
+  |  ppppppp     g  g::::::::::::::::::::::::::n:g |
+  |  ppppppp     g  g::::::::::::::::::::::::::M:g |
+  |  ppppppppp   g  g::::::::::::::::::::::::::::g |
+  |  pppppppgggggg  g::::::::.:::::::::.:::::::::g |
+  |  ppppppp        gggggggggggggggggggggggggggggg |
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  texts: 00001 / rain
+== tab1 done
+  puppet 1: tab1 at 1208,764 colour #D97757 bubble: Fixed the parser and added two tests. ✓
+  |                                                |
+  |                 gggggggggggggggggggggggggggggg |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |   ccccc         g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  cccccccgggggg  g::::::::::::::::::::::::::::g |
+  |  ccccccc        gggggggggggggggggggggggggggggg |
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  texts: dev-skill CON-1 · tab 1
+  puppet 2: tab2 at 1004,764 colour #5B8DEF bubble: -
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                          w                     |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  | uuuuuuu w                            w uuuuuuu |
+  | ukuuuuk w              w             w ukuuuuk |
+  |uuuuuuuuuw              w             wuuuuuuuuu|
+  | uuuuuuu                w               uuuuuuu |
+  | u u u u  tttttttttttttttttttttttttttt  u u u u |
+  |          tttttttttttttttttttttttttttt          |
+  |            g                      g            |
+  |            g                      g            |
+  |            g                      g            |
+  |            g                      g            |
+  |            g                      g            |
+  texts: contract 1 / break 1 / qa CON-1 · tab 2
+  puppet 3: tab3 at 800,764 colour #A06CD5 bubble: -
+  |                                                |
+  |                 gggggggggggggggggggggggggggggg |
+  |                 g::::::n:n:::::::::n:::::::::g |
+  |                 g::::::n:M:::::::::n:::::::::g |
+  |                 g::.:::n:::::.:::::n:::::::::g |
+  |                 g.:.:::n:::.:.:::.:M:::::::::g |
+  |                 gn:.:::M:::.:n:::::::.:::::::g |
+  |                 gn:n:::::::n:n:::.:::.:::::::g |
+  |                 gn:::.:::::n:::::n:::.:::::::g |
+  |                 gM:n:n:::::::n:::n:::::::::::g |
+  |   ppppp         g::n:n:::::n:n:::n:::n:.:.:::g |
+  |  ppppppp     g  g::n:n:::::n:n:.:::::n:.:.:::g |
+  |  ppppppk     g  g::M:M:::::M:M:::n:::n:n:::::g |
+  |  ppppppk     g  g::::::::::::::n:n:::n:::n:::g |
+  |  ppppppp     g  g::::::::::::::n:M:::M:n:n:.:g |
+  |  ppppppp     g  g::::::::::::::n:::::::M:n:n:g |
+  |  ppppppp     g  g::::::::::::::n:::::::::n:::g |
+  |  pppppppgggggg  g::::::::::::::M:::::::::::n:g |
+  |  ppppppp        gggggggggggggggggggggggggggggg |
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  texts: 00001 / rain
+== a lens is done
+  puppet 1: tab1 at 1208,764 colour #D97757 bubble: Fixed the parser and added two tests. ✓
+  |                                                |
+  |                 gggggggggggggggggggggggggggggg |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |   ccccc         g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  cccccccgggggg  g::::::::::::::::::::::::::::g |
+  |  ccccccc        gggggggggggggggggggggggggggggg |
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  texts: dev-skill CON-1 · tab 1
+  puppet 2: tab2 at 1004,764 colour #5B8DEF bubble: -
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                             w                  |
+  |                                                |
+  |                                                |
+  |                                                |
+  | ddddddd                              w uuuuuuu |
+  | dkddddk                w             w ukuuuuk |
+  |ddddddddd               w             wuuuuuuuuu|
+  | ddddddd                w               uuuuuuu |
+  | d d d d  tttttttttttttttttttttttttttt  u u u u |
+  |          tttttttttttttttttttttttttttt          |
+  |            g                      g            |
+  |            g                      g            |
+  |            g                      g            |
+  |            g                      g            |
+  |            g                      g            |
+  texts: contract 1 ✓ / break 1 / qa CON-1 · tab 2
+  puppet 3: tab3 at 800,764 colour #A06CD5 bubble: -
+  |                                                |
+  |                 gggggggggggggggggggggggggggggg |
+  |                 g::::::::::n:::::::.:::::n:::g |
+  |                 g::::::::::::::::::.:::::n:.:g |
+  |                 g::::::::::M:::::::::::::M:n:g |
+  |                 g::::::::::::::::::n:::::::::g |
+  |                 g.:::::::::::::::::n:::::::n:g |
+  |                 g.:::::::::::::.:::M:::::::M:g |
+  |                 g::::::::::::::.:::::::::::::g |
+  |                 gn:::::::::::::n:::::::::::::g |
+  |   ppppp         gn:::::::n:::::n:::::::::::::g |
+  |  ppppppp     g  gM:::::::n:::.:::::::::::::::g |
+  |  pkpppkp     g  g::::::::n:::::n:::::::::::::g |
+  |  pkpppkp     g  g::::::::M:::.:M:.:::::.:::::g |
+  |  ppppppp     g  g::::::::::::n:::.:::::n:::::g |
+  |  kpppppk     g  g::.:::::::::n:::::::::n:::::g |
+  |  pkkkkkp     g  g::.:::.:::::n:::n:::::n:::::g |
+  |  pppppppgggggg  g::::::n:::::::::n:::.:M:::::g |
+  |  ppppppp        gggggggggggggggggggggggggggggg |
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  texts: 00001 / rain
+== a while later: tab1 dozes at its desk
+  puppet 1: tab1 at 1208,764 colour #D97757 bubble: -
+  |                                                |
+  |                 gggggggggggggggggggggggggggggg |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |   ccccc         g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  cccccccgggggg  g::::::::::::::::::::::::::::g |
+  |  ccccccc        gggggggggggggggggggggggggggggg |
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  texts: z / dev-skill CON-1 · tab 1
+  puppet 2: tab2 at 1004,764 colour #5B8DEF bubble: -
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  | ddddddd     w                        w uuuuuuu |
+  | dkddddk                w             w ukuuuuk |
+  |ddddddddd               w             wuuuuuuuuu|
+  | ddddddd                w               uuuuuuu |
+  | d d d d  tttttttttttttttttttttttttttt  u u u u |
+  |          tttttttttttttttttttttttttttt          |
+  |            g                      g            |
+  |            g                      g            |
+  |            g                      g            |
+  |            g                      g            |
+  |            g                      g            |
+  texts: contract 1 ✓ / break 1 / qa CON-1 · tab 2
+  puppet 3: tab3 at 800,764 colour #A06CD5 bubble: -
+  |                                                |
+  |                 gggggggggggggggggggggggggggggg |
+  |                 g::::::::n:::::::::::::::n:::g |
+  |                 g::::::n:M:::::::::::::::::::g |
+  |                 g::::::n:::::::::::::::::M:::g |
+  |                 g::::::n:::::::::::::::::::::g |
+  |                 g::::::M:::.:::::::::::::::::g |
+  |                 g::::::::::n:::::::.:::::::::g |
+  |                 g::::::::::n:::::::n:::::::::g |
+  |                 g::::n:::::n:::.:::n:::::::::g |
+  |   ppppp         g::::n:::::::::.:::n:::::::::g |
+  |  ppppppp     g  g.:::n:::::n:::n:::M:::::::::g |
+  |  pkpppkp     g  gn:::M:::::M:::n:::::::::::::g |
+  |  pkpppkp     g  gn:::::::::::.:::::::::::::::g |
+  |  ppppppp     g  gn:::::::::::::n:::::::::::.:g |
+  |  kpppppk     g  gM:.:::::::::.:M:.:::::::::n:g |
+  |  pkkkkkp     g  g::.:::::::::n:::.:::::.:::n:g |
+  |  pppppppgggggg  g::.:::::::::n:::::::.:.:::::g |
+  |  ppppppp        gggggggggggggggggggggggggggggg |
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  texts: 00001 / rain
+== click on tab2 selects /dev/ttys002
+== click on tab3 brings forward com.mitchellh.ghostty
+== menu
+      Hide puppets
+      -
+      Animation to Commands Mapping
+          Coder:  dev-skill  …
+          Matrix:  rain  …
+          Ping pong:  qa  …
+      -
+      Main conversation:
+          Coder
+          Matrix
+  [x]     Ping pong while subagents run, else coder
+          Off
+      -
+      Move to Built-in
+== tab3 ends and tab1's iTerm tab closes
+  puppet 1: tab2 at 1208,764 colour #5B8DEF bubble: -
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                              w                 |
+  |                                                |
+  |                                                |
+  | ddddddd                              w uuuuuuu |
+  | dkddddk                w             w ukuuuuk |
+  |ddddddddd               w             wuuuuuuuuu|
+  | ddddddd                w               uuuuuuu |
+  | d d d d  tttttttttttttttttttttttttttt  u u u u |
+  |          tttttttttttttttttttttttttttt          |
+  |            g                      g            |
+  |            g                      g            |
+  |            g                      g            |
+  |            g                      g            |
+  |            g                      g            |
+  texts: contract 1 ✓ / break 1 / qa CON-1 · tab 1
+== after a restart, replayed from the events file
+  puppet 1: tab1 at 1208,764 colour #D97757 bubble: -
+  |                                                |
+  |                 gggggggggggggggggggggggggggggg |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |                 g::::::::::::::::::::::::::::g |
+  |   ccccc         g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  cccccck     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  ccccccc     g  g::::::::::::::::::::::::::::g |
+  |  cccccccgggggg  g::::::::::::::::::::::::::::g |
+  |  ccccccc        gggggggggggggggggggggggggggggg |
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb|
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  |  bb                                        bb  |
+  texts: z / dev-skill CON-1
+  puppet 2: tab2 at 1004,764 colour #5B8DEF bubble: -
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  |                                                |
+  | ddddddd      w                       w uuuuuuu |
+  | dkddddk                w             w ukuuuuk |
+  |ddddddddd               w             wuuuuuuuuu|
+  | ddddddd                w               uuuuuuu |
+  | d d d d  tttttttttttttttttttttttttttt  u u u u |
+  |          tttttttttttttttttttttttttttt          |
+  |            g                      g            |
+  |            g                      g            |
+  |            g                      g            |
+  |            g                      g            |
+  |            g                      g            |
+  texts: contract 1 ✓ / break 1 / qa CON-1 · tab 1
