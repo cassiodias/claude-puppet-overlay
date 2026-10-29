@@ -11,7 +11,7 @@ local obj = {}
 obj.__index = obj
 
 obj.name = "ClaudePuppet"
-obj.version = "0.2.0"
+obj.version = "0.2.1"
 obj.author = "Cassio Dias"
 obj.license = "MIT - https://opensource.org/licenses/MIT"
 obj.homepage = "https://github.com/cassiodias/claude-puppet-overlay"
@@ -375,7 +375,9 @@ function obj:handle(line)
     return
   end
   local s = self.sessions[sid] or {
-    agents = {}, order = {}, score = 0, isWorking = false, isListed = false, readingUntil = 0, summary = "",
+    agents = {}, order = {}, score = 0, isWorking = false, readingUntil = 0, summary = "",
+    -- A session first seen mid-turn has no prompt to judge by: it plays unless a commands list is set.
+    isListed = #self.commands == 0,
   }
   self.sessions[sid] = s
   self.current = sid
