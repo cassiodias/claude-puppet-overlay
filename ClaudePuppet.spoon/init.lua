@@ -1,9 +1,9 @@
 --- === ClaudePuppet ===
 ---
---- A Claude puppet that floats over your desktop and acts out what Claude Code is doing:
+--- Claude puppets that float over your desktop, one per busy Claude Code session, acting out what it is doing:
 --- it thinks, codes at its laptop, reads, runs tests, plays ping pong while subagents run,
 --- raises a hand when Claude asks you something, and says what Claude did when it is done.
---- Click it to jump to that Claude session's terminal.
+--- Click a puppet to jump to its session's terminal.
 ---
 --- Claude Code hooks append one line per event to `~/.claude-puppet/events`; this Spoon reads it.
 
@@ -11,7 +11,7 @@ local obj = {}
 obj.__index = obj
 
 obj.name = "ClaudePuppet"
-obj.version = "0.2.3"
+obj.version = "0.3.0"
 obj.author = "Cassio Dias"
 obj.license = "MIT - https://opensource.org/licenses/MIT"
 obj.homepage = "https://github.com/cassiodias/claude-puppet-overlay"
@@ -35,7 +35,10 @@ local W, H = 48, 24
 local FPS = 10
 local IDLE_SLEEP_SECONDS = 30
 local DONE_SECONDS = 8
-local RECENT_SESSION_SECONDS = 15 * 60
+local LEAVE_SECONDS = 3 * 60
+local GAP = 12
+-- Each busy session's puppet takes the first colour no other puppet is wearing.
+local PALETTE = { "#D97757", "#5B8DEF", "#A06CD5", "#4FB286", "#E0A43B" }
 local CLICK_DISTANCE = 4
 local POSITION_KEY = "ClaudePuppet.position"
 
@@ -148,8 +151,8 @@ local function stamp(buf, sprite, x, y, recolor)
   end
 end
 
--- Turns the pixel buffer into canvas rectangles, one per run of a colour on a row.
-local function toElements(buf, px)
+-- Turns the pixel buffer into canvas rectangles, one per run of a colour on a row, in a puppet's colours.
+local function toElements(buf, px, colors)
   local elements = {}
   for y = 0, H - 1 do
     local x = 0
@@ -159,7 +162,7 @@ local function toElements(buf, px)
         local run = x
         while run + 1 < W and buf[y][run + 1] == key do run = run + 1 end
         elements[#elements + 1] = {
-          type = "rectangle", action = "fill", fillColor = COLORS[key],
+          type = "rectangle", action = "fill", fillColor = colors[key],
           frame = { x = x * px, y = y * px, w = (run - x + 1) * px, h = px },
         }
         x = run + 1
@@ -176,6 +179,13 @@ local function label(text, x, y, w, align, px, isDark)
     type = "text", text = text, textColor = { white = isDark and 0.1 or 1 }, textSize = 2.5 * px,
     textAlignment = align, withShadow = not isDark, frame = { x = x * px, y = y * px, w = w * px, h = 4 * px },
   }
+end
+
+local function colorsFor(hex)
+  local colors = {}
+  for key, color in pairs(COLORS) do colors[key] = color end
+  colors.c = { hex = hex }
+  return colors
 end
 
 local function split(line)
@@ -240,7 +250,7 @@ function obj:drawMonitor(buf, texts, s)
   local at = function(slot) return 19 + march + (slot - 1) * 6 end
   local killed = s.score % #WAVE_ORDER
   local target = s.score > 0 and WAVE_ORDER[(s.score - 1) % #WAVE_ORDER + 1] or nil
-  local age = frame - self.tappedAt
+  local age = frame - s.tappedAt
   local isShooting = target ~= nil and age < 8
   local legs = INVADER[(frame // 3) % 2 + 1]
   for i = killed + 1, #WAVE_ORDER do stamp(buf, legs, at(WAVE_ORDER[i]), 5) end
@@ -286,12 +296,12 @@ function obj:drawPingPong(buf, texts, s)
 end
 
 -- The puppet waits at its desk, and dozes off after a while.
-function obj:drawIdle(buf, texts)
+function obj:drawIdle(buf, texts, s)
   local px = self.pixel
   fill(buf, 0, 19, W - 1, 20, "b")
   fill(buf, 2, 21, 3, H - 1, "b")
   fill(buf, W - 4, 21, W - 3, H - 1, "b")
-  local isAsleep = os.time() - self.lastEventAt > IDLE_SLEEP_SECONDS
+  local isAsleep = os.time() - (s and s.seenAt or self.lastEventAt) > IDLE_SLEEP_SECONDS
   stamp(buf, isAsleep and FRONT_ASLEEP or FRONT, 19, 14)
   if isAsleep then
     local rise = (self.frame // 5) % 4
@@ -307,34 +317,36 @@ local function liveAgents(s)
   return live
 end
 
-function obj:scene()
-  local s = self.sessions[self.current]
-  if not s or not s.isListed then return "idle", s end
+local function sceneFor(s)
   local live = liveAgents(s)
-  if s.mood == "asking" or s.mood == "permission" then return "code", s end
-  if #s.order >= 2 and live > 0 then return "pingpong", s end
-  if s.isWorking or live > 0 then return "code", s end
-  return "idle", s
+  if s.mood == "asking" or s.mood == "permission" then return "code" end
+  if #s.order >= 2 and live > 0 then return "pingpong" end
+  if s.isWorking or live > 0 then return "code" end
+  return "idle"
 end
 
-function obj:render()
-  self.frame = self.frame + 1
-  local buf, texts = newBuffer(), {}
-  local name, s = self:scene()
-  if name == "pingpong" then self:drawPingPong(buf, texts, s)
-  elseif name == "code" then self:drawCode(buf, texts, s)
-  else self:drawIdle(buf, texts) end
-  local elements = toElements(buf, self.pixel)
-  for _, text in ipairs(texts) do elements[#elements + 1] = text end
-  self.canvas:replaceElements(elements)
+-- A session keeps its puppet while it works, needs you or was busy in the last few minutes.
+local function isOnStage(s)
+  return s.isListed and (s.isWorking or s.mood ~= nil or liveAgents(s) > 0 or os.time() - s.seenAt < LEAVE_SECONDS)
+end
+
+-- The puppets to show, oldest session first; one puppet waits at home when no session is busy.
+function obj:stageKeys()
+  local keys = {}
+  for sid, s in pairs(self.sessions) do
+    if isOnStage(s) then keys[#keys + 1] = sid end
+  end
+  table.sort(keys, function(a, b) return self.sessions[a].joinedAt < self.sessions[b].joinedAt end)
+  if #keys == 0 then keys = { "home" } end
+  return keys
 end
 
 local BUBBLE_HEIGHT, BUBBLE_GAP, SCREEN_MARGIN = 34, 6, 8
 
--- Places the bubble above the puppet, right edges lined up, kept inside the screen the puppet is on
+-- Places a puppet's bubble above it, right edges lined up, kept inside the screen the puppet is on
 -- (below the puppet when there is no room above).
-function obj:bubbleFrame(width)
-  local top, puppetWidth, puppetHeight = self.canvas:topLeft(), W * self.pixel, H * self.pixel
+function obj:bubbleFrame(puppet, width)
+  local top, puppetWidth, puppetHeight = puppet.canvas:topLeft(), W * self.pixel, H * self.pixel
   local center = { x = top.x + puppetWidth / 2, y = top.y + puppetHeight / 2 }
   local screen = hs.screen.mainScreen():frame()
   for _, each in ipairs(hs.screen.allScreens()) do
@@ -348,37 +360,114 @@ function obj:bubbleFrame(width)
   return { x = x, y = y, w = width, h = BUBBLE_HEIGHT }
 end
 
---- ClaudePuppet:say(text, seconds)
+local function floating(canvas)
+  canvas:level(hs.canvas.windowLevels.floating)
+  canvas:behavior({ "canJoinAllSpaces", "stationary" })
+  canvas:clickActivating(false)
+  canvas:canvasMouseEvents(true, false, false, false)
+  return canvas
+end
+
+-- A new puppet and its bubble for a session, in the first free colour.
+function obj:newPuppet(key)
+  local used = {}
+  for _, puppet in pairs(self.stage) do used[puppet.color] = true end
+  local color = PALETTE[1]
+  for _, hex in ipairs(PALETTE) do
+    if not used[hex] then
+      color = hex
+      break
+    end
+  end
+  local canvas = floating(hs.canvas.new({ x = self.anchor.x, y = self.anchor.y, w = W * self.pixel, h = H * self.pixel }))
+  canvas:mouseCallback(function(_, message)
+    if message == "mouseDown" then self:startDrag(key) end
+  end)
+  local bubble = floating(hs.canvas.new({ x = self.anchor.x, y = self.anchor.y - 40, w = 200, h = BUBBLE_HEIGHT }))
+  bubble:mouseCallback(function(_, message)
+    if message == "mouseDown" then self:focus(key) end
+  end)
+  local puppet = { canvas = canvas, bubble = bubble, color = color, colors = colorsFor(color) }
+  self.stage[key] = puppet
+  return puppet
+end
+
+function obj:removePuppet(key)
+  local puppet = self.stage[key]
+  if puppet.bubbleTimer then puppet.bubbleTimer:stop() end
+  puppet.canvas:delete()
+  puppet.bubble:delete()
+  self.stage[key] = nil
+end
+
+-- Lines the puppets up leftwards from the anchor: one per session on stage, puppets of quiet sessions leave.
+function obj:layout()
+  local keys = self:stageKeys()
+  local wanted = {}
+  for _, key in ipairs(keys) do wanted[key] = true end
+  for key in pairs(self.stage) do
+    if not wanted[key] then self:removePuppet(key) end
+  end
+  for i, key in ipairs(keys) do
+    local puppet = self.stage[key] or self:newPuppet(key)
+    puppet.canvas:topLeft({ x = self.anchor.x - (i - 1) * (W * self.pixel + GAP), y = self.anchor.y })
+    if self.isShown then puppet.canvas:show() end
+    if puppet.bubble:isShowing() then puppet.bubble:frame(self:bubbleFrame(puppet, puppet.bubble:frame().w)) end
+  end
+  self.keys = keys
+end
+
+function obj:render()
+  self.frame = self.frame + 1
+  self:layout()
+  for _, key in ipairs(self.keys) do
+    local puppet, s = self.stage[key], self.sessions[key]
+    local buf, texts = newBuffer(), {}
+    local scene = s and sceneFor(s) or "idle"
+    if scene == "pingpong" then self:drawPingPong(buf, texts, s)
+    elseif scene == "code" then self:drawCode(buf, texts, s)
+    else self:drawIdle(buf, texts, s) end
+    if s then texts[#texts + 1] = label(s.tag, 0, 20.5, W, "center", self.pixel) end
+    local elements = toElements(buf, self.pixel, puppet.colors)
+    for _, text in ipairs(texts) do elements[#elements + 1] = text end
+    puppet.canvas:replaceElements(elements)
+  end
+end
+
+--- ClaudePuppet:say(key, text, seconds)
 --- Method
---- Shows a speech bubble above the puppet; it stays until the next event, or for `seconds` when given.
-function obj:say(text, seconds)
-  if self.bubbleTimer then self.bubbleTimer:stop() self.bubbleTimer = nil end
-  if not text or text == "" then self.bubble:hide() return end
+--- Shows a speech bubble above a session's puppet; it stays until the next event, or for `seconds` when given.
+function obj:say(key, text, seconds)
+  local puppet = self.stage[key]
+  if not puppet and text and text ~= "" then
+    self:layout()
+    puppet = self.stage[key]
+  end
+  if not puppet then return end
+  if puppet.bubbleTimer then
+    puppet.bubbleTimer:stop()
+    puppet.bubbleTimer = nil
+  end
+  if not text or text == "" then
+    puppet.bubble:hide()
+    return
+  end
   local width = math.min(340, 7 * (utf8.len(text) or #text) + 24)
-  self.bubble:frame(self:bubbleFrame(width))
-  self.bubble:replaceElements({
+  puppet.bubble:frame(self:bubbleFrame(puppet, width))
+  puppet.bubble:replaceElements({
     { type = "rectangle", action = "strokeAndFill", fillColor = { white = 1, alpha = 0.95 },
-      strokeColor = COLORS.c, strokeWidth = 2, roundedRectRadii = { xRadius = 10, yRadius = 10 } },
+      strokeColor = { hex = puppet.color }, strokeWidth = 2, roundedRectRadii = { xRadius = 10, yRadius = 10 } },
     { type = "text", text = text, textColor = { white = 0.1 }, textSize = 12,
       frame = { x = 12, y = 8, w = width - 24, h = 20 } },
   })
-  self.bubble:show()
-  if seconds then self.bubbleTimer = hs.timer.doAfter(seconds, function() self:say(nil) end) end
-end
-
--- Names the session in a bubble when more than one has been busy lately, so you know where to look.
-function obj:prefix(s)
-  local recent = 0
-  for _, other in pairs(self.sessions) do
-    if os.time() - other.seenAt < RECENT_SESSION_SECONDS then recent = recent + 1 end
-  end
-  return (recent > 1 and s.folder ~= "") and ("[" .. s.folder .. "] ") or ""
+  if self.isShown then puppet.bubble:show() end
+  if seconds then puppet.bubbleTimer = hs.timer.doAfter(seconds, function() self:say(key, nil) end) end
 end
 
 -- Ends the turn's show once the main thread and every subagent are done, saying what Claude did.
-function obj:finish(s)
+function obj:finish(sid, s)
   if s.isListed and not s.isWorking and liveAgents(s) == 0 then
-    self:say(self:prefix(s) .. (s.summary ~= "" and s.summary or "Done") .. " ✓", DONE_SECONDS)
+    self:say(sid, (s.summary ~= "" and s.summary or "Done") .. " ✓", DONE_SECONDS)
   end
 end
 
@@ -392,42 +481,49 @@ function obj:handle(line)
     self.sessions[sid] = nil
     return
   end
-  local s = self.sessions[sid] or {
-    agents = {}, order = {}, score = 0, isWorking = false, readingUntil = 0, summary = "",
-    -- A session first seen mid-turn has no prompt to judge by: it plays unless a commands list is set.
-    isListed = #self.commands == 0,
-  }
-  self.sessions[sid] = s
-  self.current = sid
+  local s = self.sessions[sid]
+  if not s then
+    self.joined = self.joined + 1
+    s = {
+      agents = {}, order = {}, score = 0, isWorking = false, readingUntil = 0, summary = "", tappedAt = -100,
+      joinedAt = self.joined, folder = "", tag = "",
+      -- A session first seen mid-turn has no prompt to judge by: it plays unless a commands list is set.
+      isListed = #self.commands == 0,
+    }
+    self.sessions[sid] = s
+  end
   self.lastEventAt = os.time()
   s.seenAt = os.time()
   if folder ~= "" then s.folder = folder end
   if app ~= "" then s.app = app end
-  s.folder = s.folder or ""
+  if s.tag == "" then s.tag = s.folder end
 
   if event == "UserPromptSubmit" then
     s.agents, s.order, s.score, s.isWorking, s.test, s.summary = {}, {}, 0, true, nil, ""
     s.isListed = isListed(self.commands, text)
+    s.tag = text ~= "" and text:gsub("^/", "") or s.folder
     s.mood = "thinking"
-    self:say(nil)
+    self:say(sid, nil)
   elseif event == "PreToolUse" then
     if aid ~= "" and s.agents[aid] then s.agents[aid].hits = s.agents[aid].hits + 1 end
     -- Claude calling a listed skill starts the show mid-turn, as typing its /command does.
-    if tool == "Skill" and #self.commands > 0 and isListed(self.commands, text) then s.isListed = true end
+    if tool == "Skill" and #self.commands > 0 and isListed(self.commands, text) then
+      s.isListed, s.tag = true, text
+    end
     if aid == "" then
       s.isWorking = true
       s.mood = nil
       if tool == "AskUserQuestion" then s.mood, s.moodText = "asking", "I have a question for you" end
       if tool == "ExitPlanMode" then s.mood, s.moodText = "asking", "Plan ready for you" end
     end
-    if s.mood == "asking" and s.isListed then self:say(self:prefix(s) .. s.moodText) else self:say(nil) end
+    if s.mood == "asking" and s.isListed then self:say(sid, s.moodText) else self:say(sid, nil) end
     if READING_TOOLS[tool] then
       s.readingUntil = self.frame + 20
     elseif flag == "test" then
       s.test = { state = "running" }
     else
       s.score = s.score + 1
-      self.tappedAt = self.frame
+      s.tappedAt = self.frame
     end
   elseif event == "PostToolUse" or event == "PostToolUseFailure" then
     if flag == "test" and s.test then
@@ -435,24 +531,24 @@ function obj:handle(line)
     end
     if s.mood == "permission" or s.mood == "asking" then
       s.mood = nil
-      self:say(nil)
+      self:say(sid, nil)
     end
   elseif event == "PermissionRequest" then
     s.mood, s.moodText = "permission", (tool ~= "" and tool or "OK")
-    if s.isListed then self:say(self:prefix(s) .. "May I use " .. s.moodText .. "?") end
+    if s.isListed then self:say(sid, "May I use " .. s.moodText .. "?") end
   elseif event == "SubagentStart" and aid ~= "" then
     s.agents[aid] = { label = (atype ~= "" and atype or "agent"):sub(1, 18), hits = 0, done = false }
     s.order[#s.order + 1] = aid
   elseif event == "SubagentStop" and s.agents[aid] then
     s.agents[aid].done = true
-    self:finish(s)
+    self:finish(sid, s)
   elseif event == "Notification" then
     local isShown = s.mood == "permission" or s.mood == "asking"
-    if s.isListed and not isShown then self:say(self:prefix(s) .. (text ~= "" and text or "Claude needs you")) end
+    if s.isListed and not isShown then self:say(sid, text ~= "" and text or "Claude needs you") end
   elseif event == "Stop" then
     s.isWorking, s.mood, s.summary = false, nil, text
     -- Background subagents may still be working; the last one to stop says it then.
-    self:finish(s)
+    self:finish(sid, s)
   end
 end
 
@@ -471,14 +567,9 @@ function obj:readEvents()
   for line in complete:gmatch("([^\n]*)\n") do self:handle(line) end
 end
 
-function obj:moveTo(point)
-  self.canvas:topLeft(point)
-  if self.bubble:isShowing() then self.bubble:frame(self:bubbleFrame(self.bubble:frame().w)) end
-end
-
--- Brings forward the terminal running the current session, and its window when the title names the folder.
-function obj:focus()
-  local s = self.sessions[self.current]
+-- Brings forward the terminal running a session, and its window when the title names the folder.
+function obj:focus(key)
+  local s = self.sessions[key]
   local bundle = s and TERMINALS[s.app or ""]
   if not bundle then return end
   hs.application.launchOrFocusByBundleID(bundle)
@@ -492,19 +583,20 @@ function obj:focus()
   end
 end
 
--- Dragging the puppet moves it, and the place is remembered; a click without a drag is a focus.
-function obj:startDrag()
+-- Dragging any puppet moves the whole row, and the place is remembered; a click without a drag is a focus.
+function obj:startDrag(key)
   local start = hs.mouse.absolutePosition()
-  local origin = self.canvas:topLeft()
+  local origin = { x = self.anchor.x, y = self.anchor.y }
   local types = hs.eventtap.event.types
   self.dragTap = hs.eventtap.new({ types.leftMouseDragged, types.leftMouseUp }, function(e)
     local now = hs.mouse.absolutePosition()
-    self:moveTo({ x = origin.x + now.x - start.x, y = origin.y + now.y - start.y })
+    self.anchor = { x = origin.x + now.x - start.x, y = origin.y + now.y - start.y }
+    self:layout()
     if e:getType() == types.leftMouseUp then
       self.dragTap:stop()
       self.dragTap = nil
-      hs.settings.set(POSITION_KEY, self.canvas:topLeft())
-      if math.abs(now.x - start.x) + math.abs(now.y - start.y) < CLICK_DISTANCE then self:focus() end
+      hs.settings.set(POSITION_KEY, self.anchor)
+      if math.abs(now.x - start.x) + math.abs(now.y - start.y) < CLICK_DISTANCE then self:focus(key) end
     end
     return false
   end)
@@ -517,49 +609,35 @@ function obj:defaultPosition()
 end
 
 function obj:toggle()
-  if self.canvas:isShowing() then
-    self.canvas:hide()
-    self.bubble:hide()
-  else
-    self.canvas:show()
+  self.isShown = not self.isShown
+  for _, puppet in pairs(self.stage) do
+    if self.isShown then
+      puppet.canvas:show()
+    else
+      puppet.canvas:hide()
+      puppet.bubble:hide()
+    end
   end
 end
 
 --- ClaudePuppet:start()
 --- Method
---- Shows the puppet and starts following Claude Code's events.
+--- Shows the puppets and starts following Claude Code's events.
 function obj:start()
-  local px = self.pixel
-  local position = hs.settings.get(POSITION_KEY) or self:defaultPosition()
-  self.frame, self.tappedAt, self.lastEventAt = 0, -100, os.time()
-  self.sessions, self.current = {}, nil
+  self.anchor = hs.settings.get(POSITION_KEY) or self:defaultPosition()
+  self.frame, self.lastEventAt, self.joined, self.isShown = 0, os.time(), 0, true
+  self.sessions, self.stage, self.keys = {}, {}, {}
   self.offset = hs.fs.attributes(self.eventsFile, "size") or 0
-
-  self.canvas = hs.canvas.new({ x = position.x, y = position.y, w = W * px, h = H * px })
-  self.canvas:level(hs.canvas.windowLevels.floating)
-  self.canvas:behavior({ "canJoinAllSpaces", "stationary" })
-  self.canvas:clickActivating(false)
-  self.canvas:canvasMouseEvents(true, false, false, false)
-  self.canvas:mouseCallback(function(_, message)
-    if message == "mouseDown" then self:startDrag() end
-  end)
-  self.bubble = hs.canvas.new({ x = position.x, y = position.y - 40, w = 200, h = 34 })
-  self.bubble:level(hs.canvas.windowLevels.floating)
-  self.bubble:behavior({ "canJoinAllSpaces", "stationary" })
-  self.bubble:clickActivating(false)
-  self.bubble:canvasMouseEvents(true, false, false, false)
-  self.bubble:mouseCallback(function(_, message)
-    if message == "mouseDown" then self:focus() end
-  end)
 
   self.menu = hs.menubar.new()
   self.menu:setTitle("▟▙")
   self.menu:setMenu(function()
     return {
-      { title = self.canvas:isShowing() and "Hide puppet" or "Show puppet", fn = function() self:toggle() end },
+      { title = self.isShown and "Hide puppets" or "Show puppets", fn = function() self:toggle() end },
       { title = "Move to corner", fn = function()
         hs.settings.clear(POSITION_KEY)
-        self:moveTo(self:defaultPosition())
+        self.anchor = self:defaultPosition()
+        self:layout()
       end },
     }
   end)
@@ -569,21 +647,18 @@ function obj:start()
     self:render()
   end)
   self:render()
-  self.canvas:show()
   return self
 end
 
 --- ClaudePuppet:stop()
 --- Method
---- Hides the puppet and stops following events.
+--- Hides the puppets and stops following events.
 function obj:stop()
   if self.timer then self.timer:stop() end
   if self.dragTap then self.dragTap:stop() end
-  if self.bubbleTimer then self.bubbleTimer:stop() end
   if self.menu then self.menu:delete() end
-  if self.canvas then self.canvas:delete() end
-  if self.bubble then self.bubble:delete() end
-  self.timer, self.dragTap, self.bubbleTimer, self.menu, self.canvas, self.bubble = nil, nil, nil, nil, nil, nil
+  for key in pairs(self.stage or {}) do self:removePuppet(key) end
+  self.timer, self.dragTap, self.menu = nil, nil, nil
   return self
 end
 

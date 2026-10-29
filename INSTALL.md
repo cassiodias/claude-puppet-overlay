@@ -50,7 +50,7 @@ macOS asks you for these, and no script can click them for you:
 1. **Open Hammerspoon:** `open -a Hammerspoon`. On the first launch it shows a setup window.
 2. **Allow Accessibility:** System Settings → Privacy & Security → **Accessibility** → turn on **Hammerspoon**. Without it you cannot drag the puppet or click it to jump to your terminal.
 3. **Launch at login:** click the Hammerspoon icon in the menu bar → **Preferences** → tick **Launch Hammerspoon at login**. Otherwise the puppet is gone after a restart.
-4. **Reload:** click the Hammerspoon icon → **Reload Config**. The puppet appears in the bottom right corner of your main screen, with a `▟▙` icon in the menu bar to hide it or move it back to the corner.
+4. **Reload:** click the Hammerspoon icon → **Reload Config**. A puppet appears in the bottom right corner of your main screen, with a `▟▙` icon in the menu bar to hide the puppets or move them back to the corner. More puppets line up to its left while several Claude sessions are busy.
 5. **Start a new Claude Code session.** Sessions that were already open do not pick up the new hooks.
 
 ## 6. Try it

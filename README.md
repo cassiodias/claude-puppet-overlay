@@ -1,6 +1,6 @@
 # claude-puppet-overlay
 
-A Claude puppet that floats over your Mac desktop, like the old Office paperclip, and acts out what Claude Code is doing.
+Claude puppets that float over your Mac desktop, like the old Office paperclip, and act out what Claude Code is doing: one puppet per busy Claude session.
 
 | When Claude is... | The puppet... |
 | --- | --- |
@@ -14,9 +14,9 @@ A Claude puppet that floats over your Mac desktop, like the old Office paperclip
 | done | says the first sentence of Claude's answer, like "Fixed the parser and added two tests. ✓" |
 | idle | waits at its desk, and dozes off after a while |
 
-- **Click the puppet** (or its bubble) to jump to the terminal running that Claude session.
-- **Drag it** anywhere; it stays on top of every app and every desktop.
-- **Several Claude sessions?** Bubbles name the project folder, like `[my-app] May I use Bash?`.
+- **One puppet per session:** with one tab coding and another reviewing, two puppets sit side by side, each in its own colour, with a name tag (the `/command` you ran, or the project folder), its own scene and its own bubble. A session quiet for 3 minutes walks off; with nothing busy, one puppet waits at home.
+- **Click a puppet** (or its bubble) to jump to the terminal running that session.
+- **Drag any puppet** to move the whole row; it stays on top of every app and every desktop.
 
 It is two small pieces: a Claude Code hook that writes one line per event to `~/.claude-puppet/events`, and a [Hammerspoon](https://www.hammerspoon.org) Spoon that reads them and draws the puppet. Nothing leaves your machine. From your prompts it keeps only a leading `/command`; from Claude's answers, only the first sentence; never commands or code.
 
