@@ -11,7 +11,7 @@ local obj = {}
 obj.__index = obj
 
 obj.name = "ClaudePuppet"
-obj.version = "0.4.3"
+obj.version = "0.6.0"
 obj.author = "Cassio Dias"
 obj.license = "MIT - https://opensource.org/licenses/MIT"
 obj.homepage = "https://github.com/cassiodias/claude-puppet-overlay"
@@ -19,6 +19,7 @@ obj.homepage = "https://github.com/cassiodias/claude-puppet-overlay"
 --- ClaudePuppet.commands
 --- Variable
 --- Slash commands that play a scene, without the slash; empty plays one for every turn.
+--- The starting choice: once you tick commands in the menu bar, that choice is kept instead.
 obj.commands = {}
 
 --- ClaudePuppet.pixel
@@ -35,12 +36,18 @@ local W, H = 48, 24
 local FPS = 10
 local IDLE_SLEEP_SECONDS = 30
 local DONE_SECONDS = 8
-local LEAVE_SECONDS = 3 * 60
+local STALE_SECONDS = 2 * 60 * 60
 local GAP = 12
 -- Each busy session's puppet takes the first colour no other puppet is wearing.
 local PALETTE = { "#D97757", "#5B8DEF", "#A06CD5", "#4FB286", "#E0A43B" }
 local CLICK_DISTANCE = 4
 local POSITION_KEY = "ClaudePuppet.position"
+local SCENES_KEY = "ClaudePuppet.scenes"
+-- What a command's turns show: auto plays ping pong while two subagents run and codes otherwise.
+local SCENE_CHOICES = { { "auto", "Auto: ping pong with subagents, else coder" }, { "coder", "Coder" }, { "pingpong", "Ping pong" } }
+local COMMANDS_KEY = "ClaudePuppet.commands"
+local SEEN_KEY = "ClaudePuppet.seenCommands"
+local SEEN_LIMIT = 15
 
 local COLORS = {
   c = { hex = "#D97757" }, -- the puppet
@@ -218,8 +225,7 @@ local function split(line)
   return fields
 end
 
-local function isListed(commands, command)
-  if #commands == 0 then return true end
+local function contains(commands, command)
   local name = (command or ""):gsub("^/", "")
   for _, listed in ipairs(commands) do
     if listed:gsub("^/", "") == name then return true end
@@ -227,10 +233,23 @@ local function isListed(commands, command)
   return false
 end
 
+-- An empty commands list plays every turn.
+local function isListed(commands, command)
+  return #commands == 0 or contains(commands, command)
+end
+
 -- The puppet's pose at the desk: typing, thinking, a raised hand, a sign asking for permission,
 -- and now and then a turn to smile at you.
-function obj:drawPuppet(buf, texts, s)
+function obj:drawPuppet(buf, texts, s, isResting)
   local frame, px = self.frame, self.pixel
+  if isResting then
+    stamp(buf, SIDE, 1, 10)
+    if os.time() - s.seenAt > IDLE_SLEEP_SECONDS then
+      local rise = (frame // 5) % 4
+      texts[#texts + 1] = label("z", 9 + rise, 6 - rise, 4, "left", px)
+    end
+    return
+  end
   local isSmiling = s.mood == nil and frame % 80 >= 68
   stamp(buf, isSmiling and SMILE or SIDE, 1, 10)
   if s.mood == "thinking" then
@@ -251,10 +270,11 @@ function obj:drawPuppet(buf, texts, s)
 end
 
 -- The monitor: invaders it shoots with each tool call, a lens while it reads, a progress bar while tests run.
-function obj:drawMonitor(buf, texts, s)
+function obj:drawMonitor(buf, texts, s, isResting)
   local frame, px = self.frame, self.pixel
   fill(buf, 17, 1, W - 2, 18, "g")
   fill(buf, 18, 2, W - 3, 17, "s")
+  if isResting then return end
   texts[#texts + 1] = label(string.format("%05d", s.score), 30, 1.5, 15, "right", px)
   if s.test and s.test.state == "running" then
     fill(buf, 21, 9, 42, 10, "g")
@@ -285,21 +305,23 @@ function obj:drawMonitor(buf, texts, s)
   stamp(buf, SHIP, ship, 15)
 end
 
--- The puppet at its desk, with a small `_|` laptop under its paws and a monitor.
-function obj:drawCode(buf, texts, s)
+-- The puppet at its desk, with a small `_|` laptop under its paws and a monitor; resting, the monitor is off.
+function obj:drawCode(buf, texts, s, isResting)
   fill(buf, 0, 19, W - 1, 20, "b")
   fill(buf, 2, 21, 3, H - 1, "b")
   fill(buf, W - 4, 21, W - 3, H - 1, "b")
   fill(buf, 9, 17, 14, 17, "g")
   fill(buf, 14, 11, 14, 17, "g")
-  self:drawPuppet(buf, texts, s)
-  self:drawMonitor(buf, texts, s)
+  self:drawPuppet(buf, texts, s, isResting)
+  self:drawMonitor(buf, texts, s, isResting)
 end
 
 -- Two puppets rally over a table; each seat is one of the turn's first two subagents, scoring its tool calls.
 function obj:drawPingPong(buf, texts, s)
   local frame, px = self.frame, self.pixel
-  local left, right = s.agents[s.order[1]], s.agents[s.order[2]]
+  -- Stand-ins hold the seats a command's turn has no subagent for.
+  local left = s.agents[s.order[1]] or { label = s.tag, hits = s.score, done = false }
+  local right = s.agents[s.order[2]] or { label = "claude", hits = 0, done = false }
   fill(buf, 10, 17, W - 11, 18, "t")
   fill(buf, 12, 19, 12, H - 1, "g")
   fill(buf, W - 13, 19, W - 13, H - 1, "g")
@@ -319,13 +341,13 @@ function obj:drawPingPong(buf, texts, s)
   texts[#texts + 1] = label(right.label .. " " .. right.hits .. (right.done and " ✓" or ""), W - 22, 2, 22, "right", px)
 end
 
--- The puppet waits at its desk, and dozes off after a while.
-function obj:drawIdle(buf, texts, s)
+-- The home puppet waits when no session has a puppet, and dozes off after a while.
+function obj:drawIdle(buf, texts)
   local px = self.pixel
   fill(buf, 0, 19, W - 1, 20, "b")
   fill(buf, 2, 21, 3, H - 1, "b")
   fill(buf, W - 4, 21, W - 3, H - 1, "b")
-  local isAsleep = os.time() - (s and s.seenAt or self.lastEventAt) > IDLE_SLEEP_SECONDS
+  local isAsleep = os.time() - self.lastEventAt > IDLE_SLEEP_SECONDS
   stamp(buf, isAsleep and FRONT_ASLEEP or FRONT, 19, 14)
   if isAsleep then
     local rise = (self.frame // 5) % 4
@@ -341,17 +363,22 @@ local function liveAgents(s)
   return live
 end
 
-local function sceneFor(s)
+-- The scene for a session now: its command's chosen scene while it works, its desk at rest otherwise.
+function obj:sceneFor(s)
   local live = liveAgents(s)
+  if not s.isListed then return "rest" end
   if s.mood == "asking" or s.mood == "permission" then return "code" end
-  if #s.order >= 2 and live > 0 then return "pingpong" end
-  if s.isWorking or live > 0 then return "code" end
-  return "idle"
+  if not (s.isWorking or live > 0) then return "rest" end
+  local choice = s.command and self.scenes[s.command] or "auto"
+  if choice == "pingpong" or (choice == "auto" and #s.order >= 2 and live > 0) then return "pingpong" end
+  return "code"
 end
 
--- A session keeps its puppet while it works, needs you or was busy in the last few minutes.
+-- A session that has played keeps its puppet and desk until it ends, its iTerm tab closes,
+-- or it has been silent for hours.
 local function isOnStage(s)
-  return s.isListed and (s.isWorking or s.mood ~= nil or liveAgents(s) > 0 or os.time() - s.seenAt < LEAVE_SECONDS)
+  if s.isListed and (s.isWorking or s.mood ~= nil or liveAgents(s) > 0) then s.hasPlayed = true end
+  return s.hasPlayed and not s.isClosed and os.time() - s.seenAt < STALE_SECONDS
 end
 
 -- The puppets to show, oldest session first; one puppet waits at home when no session is busy.
@@ -404,8 +431,14 @@ function obj:newPuppet(key)
     end
   end
   local canvas = floating(hs.canvas.new({ x = self.anchor.x, y = self.anchor.y, w = W * self.pixel, h = H * self.pixel }))
+  -- Option-click opens the menu bar menu here, for when the menu bar icon is hidden behind the notch.
   canvas:mouseCallback(function(_, message)
-    if message == "mouseDown" then self:startDrag(key) end
+    if message ~= "mouseDown" then return end
+    if hs.eventtap.checkKeyboardModifiers().alt then
+      self.menu:popupMenu(hs.mouse.absolutePosition())
+    else
+      self:startDrag(key)
+    end
   end)
   local bubble = floating(hs.canvas.new({ x = self.anchor.x, y = self.anchor.y - 40, w = 200, h = BUBBLE_HEIGHT }))
   bubble:mouseCallback(function(_, message)
@@ -450,10 +483,11 @@ function obj:render()
   for _, key in ipairs(self.keys) do
     local puppet, s = self.stage[key], self.sessions[key]
     local buf, texts = newBuffer(), {}
-    local scene = s and sceneFor(s) or "idle"
+    local scene = s and self:sceneFor(s) or "home"
     if scene == "pingpong" then self:drawPingPong(buf, texts, s)
     elseif scene == "code" then self:drawCode(buf, texts, s)
-    else self:drawIdle(buf, texts, s) end
+    elseif scene == "rest" then self:drawCode(buf, texts, s, true)
+    else self:drawIdle(buf, texts) end
     if s then
       local tab = self:tabLabel(s)
       for _, element in ipairs(pill(tab and (s.tag .. " · " .. tab) or s.tag, self.pixel)) do
@@ -537,6 +571,8 @@ function obj:handle(line)
 
   if event == "UserPromptSubmit" then
     s.agents, s.order, s.score, s.isWorking, s.test, s.summary = {}, {}, 0, true, nil, ""
+    s.command = text:match("^/(%S+)")
+    if s.command then self:remember(s.command) end
     s.isListed = isListed(self.commands, text)
     s.tag = text ~= "" and text:gsub("^/", "") or s.folder
     s.mood = "thinking"
@@ -544,8 +580,9 @@ function obj:handle(line)
   elseif event == "PreToolUse" then
     if aid ~= "" and s.agents[aid] then s.agents[aid].hits = s.agents[aid].hits + 1 end
     -- Claude calling a listed skill starts the show mid-turn, as typing its /command does.
-    if tool == "Skill" and #self.commands > 0 and isListed(self.commands, text) then
-      s.isListed, s.tag = true, text
+    if tool == "Skill" and text ~= "" then self:remember(text) end
+    if tool == "Skill" and contains(self.commands, text) then
+      s.isListed, s.tag, s.command = true, text, text
     end
     if aid == "" then
       s.isWorking = true
@@ -589,6 +626,82 @@ function obj:handle(line)
   end
 end
 
+-- Keeps the commands and skills seen lately, newest first, for the menu to offer.
+function obj:remember(command)
+  local seen = { command }
+  for _, other in ipairs(self.seen) do
+    if other ~= command and #seen < SEEN_LIMIT then seen[#seen + 1] = other end
+  end
+  self.seen = seen
+  hs.settings.set(SEEN_KEY, seen)
+end
+
+-- Applies a new commands choice at once: each session plays if its current turn's command is now listed.
+function obj:setCommands(commands)
+  self.commands = commands
+  hs.settings.set(COMMANDS_KEY, commands)
+  for _, s in pairs(self.sessions) do
+    s.isListed = #commands == 0 or (s.command ~= nil and contains(commands, s.command))
+  end
+end
+
+function obj:setScene(command, scene)
+  self.scenes[command] = scene ~= "auto" and scene or nil
+  hs.settings.set(SCENES_KEY, self.scenes)
+end
+
+function obj:toggleCommand(command)
+  local commands, isRemoved = {}, false
+  for _, listed in ipairs(self.commands) do
+    if listed:gsub("^/", "") == command then isRemoved = true else commands[#commands + 1] = listed end
+  end
+  if not isRemoved then commands[#commands + 1] = command end
+  self:setCommands(commands)
+end
+
+function obj:addCommand()
+  hs.focus()
+  local button, typed = hs.dialog.textPrompt("Play for a command", "The slash command or skill, like principal-developer",
+    "", "Add", "Cancel")
+  local command = (typed or ""):gsub("^%s*/?", ""):gsub("%s.*$", "")
+  if button ~= "Add" or command == "" then return end
+  self:remember(command)
+  if not contains(self.commands, command) then self:toggleCommand(command) end
+end
+
+-- The menu bar menu: show or hide, which commands play, and which screen the puppets sit on.
+function obj:menuItems()
+  local items = {
+    { title = self.isShown and "Hide puppets" or "Show puppets", fn = function() self:toggle() end },
+    { title = "-" },
+    { title = "Play for every turn", checked = #self.commands == 0, fn = function() self:setCommands({}) end },
+    { title = "Play only for:", disabled = true },
+  }
+  local offered = {}
+  for _, command in ipairs(self.commands) do offered[#offered + 1] = command:gsub("^/", "") end
+  for _, command in ipairs(self.seen) do
+    if not contains(offered, command) then offered[#offered + 1] = command end
+  end
+  for _, command in ipairs(offered) do
+    local isOn = contains(self.commands, command)
+    local scene = self.scenes[command] or "auto"
+    local submenu = { { title = "Play for " .. command, checked = isOn, fn = function() self:toggleCommand(command) end },
+      { title = "-" } }
+    for _, choice in ipairs(SCENE_CHOICES) do
+      submenu[#submenu + 1] = { title = choice[2], checked = scene == choice[1],
+        fn = function() self:setScene(command, choice[1]) end }
+    end
+    local shown = scene == "auto" and "" or (" · " .. (scene == "coder" and "coder" or "ping pong"))
+    items[#items + 1] = { title = "    " .. command .. shown, checked = isOn, menu = submenu }
+  end
+  items[#items + 1] = { title = "    Add command…", fn = function() self:addCommand() end }
+  items[#items + 1] = { title = "-" }
+  for _, screen in ipairs(hs.screen.allScreens()) do
+    items[#items + 1] = { title = "Move to " .. screen:name(), fn = function() self:moveToCorner(screen) end }
+  end
+  return items
+end
+
 -- Reads the lines the hook appended since the last read; a file that shrank was emptied, so it starts over.
 function obj:readEvents()
   local size = hs.fs.attributes(self.eventsFile, "size")
@@ -628,6 +741,11 @@ function obj:refreshTabs()
   for tty, window, tab in result:gmatch("([^=;]+)=(%d+)/(%d+);") do
     self.tabs[tty] = { window = tonumber(window), tab = tonumber(tab) }
     self.iTermWindows = math.max(self.iTermWindows, tonumber(window))
+  end
+  -- A session whose iTerm tab was there and is gone was closed without saying so.
+  for _, s in pairs(self.sessions) do
+    if s.tty and self.tabs[s.tty] then s.wasInTab = true end
+    if s.tty and s.wasInTab and not self.tabs[s.tty] then s.isClosed = true end
   end
 end
 
@@ -744,20 +862,15 @@ function obj:start()
   end)
   self.screenWatcher:start()
   self.frame, self.lastEventAt, self.joined, self.isShown = 0, os.time(), 0, true
+  self.commands = hs.settings.get(COMMANDS_KEY) or self.commands
+  self.seen = hs.settings.get(SEEN_KEY) or {}
+  self.scenes = hs.settings.get(SCENES_KEY) or {}
   self.sessions, self.stage, self.keys, self.tabs, self.iTermWindows = {}, {}, {}, {}, 0
   self.offset = hs.fs.attributes(self.eventsFile, "size") or 0
 
   self.menu = hs.menubar.new()
   self.menu:setTitle("▟▙")
-  self.menu:setMenu(function()
-    local items = {
-      { title = self.isShown and "Hide puppets" or "Show puppets", fn = function() self:toggle() end },
-    }
-    for _, screen in ipairs(hs.screen.allScreens()) do
-      items[#items + 1] = { title = "Move to " .. screen:name(), fn = function() self:moveToCorner(screen) end }
-    end
-    return items
-  end)
+  self.menu:setMenu(function() return self:menuItems() end)
 
   self.timer = hs.timer.doEvery(1 / FPS, function()
     self:readEvents()

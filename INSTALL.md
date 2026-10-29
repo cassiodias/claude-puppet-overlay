@@ -62,15 +62,22 @@ To see ping pong, ask Claude for two subagents at once, for example: *"Use two s
 
 ## Only for some commands
 
-By default the puppet acts out every turn. To have it play only while some slash commands or skills run, list them in `~/.hammerspoon/init.lua`, before the `start()` line:
+By default the puppets act out every turn. To have them play only while some slash commands or skills run, click the `▟▙` icon in the menu bar:
+
+- Under **Play only for**, each command you typed lately (and each skill Claude called) has a submenu: tick **Play for it**, and pick its scene: **Coder**, **Ping pong**, or **Auto** (ping pong while two subagents run, coder otherwise). **Add command…** adds one it has not seen yet, without the slash.
+- **Play for every turn** goes back to playing for everything.
+
+The choice takes effect at once, per session: with `principal-developer` set to Coder and `principal-qa-reviewer` set to Ping pong, the tab running the developer skill gets a puppet that codes, the tab running the reviewer gets one that plays ping pong, and a tab where you just chat gets no puppet. A turn plays when you type a ticked command, or from the moment Claude calls a ticked skill. Hammerspoon remembers the choice across restarts.
+
+Menu bar icon hidden behind the notch? **Option-click any puppet** to open the same menu.
+
+If you prefer a file, set the starting choice in `~/.hammerspoon/init.lua`, before the `start()` line (the menu's choice wins once you have used it):
 
 ```lua
-hs.loadSpoon("ClaudePuppet")
 spoon.ClaudePuppet.commands = { "code-review", "my-coding-skill" }
-spoon.ClaudePuppet:start()
 ```
 
-Then **Reload Config**. A turn plays when you type one of them (`/my-coding-skill ...`) or when Claude calls one through its Skill tool, from that call on. Other turns leave the puppet idle. `spoon.ClaudePuppet.pixel = 5` makes it bigger (the default is 4).
+`spoon.ClaudePuppet.pixel = 5` makes the puppets bigger (the default is 4).
 
 ## Update
 

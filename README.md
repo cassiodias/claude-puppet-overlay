@@ -14,7 +14,8 @@ Claude puppets that float over your Mac desktop, like the old Office paperclip, 
 | done | says the first sentence of Claude's answer, like "Fixed the parser and added two tests. ✓" |
 | idle | waits at its desk, and dozes off after a while |
 
-- **One puppet per session:** with one tab coding and another reviewing, two puppets sit side by side, each in its own colour, with a name tag (the `/command` you ran, or the project folder), its own scene and its own bubble. A session quiet for 3 minutes walks off; with nothing busy, one puppet waits at home.
+- **One puppet per session:** with one tab coding and another reviewing, two puppets sit side by side, each in its own colour, with a name tag (the command you ran, or the project folder), its own scene and its own bubble. Between turns a puppet rests at its desk with the monitor off, and dozes; it leaves when its session ends or its iTerm tab closes. With no session on stage, one puppet waits at home.
+- **Pick the commands that play, and their scene,** from the `▟▙` menu bar icon (or Option-click a puppet): tick `my-coding-skill` as Coder and `my-reviewer` as Ping pong, and only turns running them get a show, in whichever tab runs them.
 - **Click a puppet** (or its bubble) to jump to the terminal running that session. In iTerm2 it selects the exact window and tab, and the tab number is written under the puppet's table (`tab 3`, or `window 2 · tab 3` with several windows).
 - **Drag any puppet** to move the whole row, across screens too; it stays on top of every app and every desktop. The `▟▙` menu bar icon sends the row to the corner of any screen, and puppets left on a screen you unplug come back to the main one.
 
