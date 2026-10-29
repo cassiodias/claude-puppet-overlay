@@ -11,7 +11,7 @@ local obj = {}
 obj.__index = obj
 
 obj.name = "ClaudePuppet"
-obj.version = "0.4.2"
+obj.version = "0.4.3"
 obj.author = "Cassio Dias"
 obj.license = "MIT - https://opensource.org/licenses/MIT"
 obj.homepage = "https://github.com/cassiodias/claude-puppet-overlay"
@@ -184,7 +184,7 @@ local function label(text, x, y, w, align, px, isDark)
     color = { white = isDark and 0.1 or 1 },
     paragraphStyle = { alignment = align },
   }
-  if not isDark then style.strokeColor, style.strokeWidth = { white = 0 }, -5 end
+  if not isDark then style.strokeColor, style.strokeWidth = { white = 0 }, -3 end
   return {
     type = "text", text = hs.styledtext.new(text, style),
     frame = { x = x * px, y = y * px, w = w * px, h = 4 * px },
@@ -196,6 +196,20 @@ local function colorsFor(hex)
   for key, color in pairs(COLORS) do colors[key] = color end
   colors.c = { hex = hex }
   return colors
+end
+
+-- A name tag under the table: white text on a dark pill, clear on any desktop.
+local function pill(text, px)
+  local size = 2.3 * px
+  local width = math.min(W * px, (utf8.len(text) or #text) * size * 0.62 + 3 * px)
+  local frame = { x = (W * px - width) / 2, y = 20.8 * px, w = width, h = 3.2 * px }
+  return {
+    { type = "rectangle", action = "fill", fillColor = { white = 0.08, alpha = 0.85 },
+      roundedRectRadii = { xRadius = 1.6 * px, yRadius = 1.6 * px }, frame = frame },
+    { type = "text", frame = { x = frame.x, y = frame.y + 0.25 * px, w = width, h = frame.h },
+      text = hs.styledtext.new(text, { font = { name = "Menlo-Bold", size = size }, color = { white = 1 },
+        paragraphStyle = { alignment = "center", lineBreak = "truncateTail" } }) },
+  }
 end
 
 local function split(line)
@@ -351,11 +365,11 @@ function obj:stageKeys()
   return keys
 end
 
-local BUBBLE_HEIGHT, BUBBLE_GAP, SCREEN_MARGIN = 34, 6, 8
+local BUBBLE_HEIGHT, BUBBLE_GAP, SCREEN_MARGIN, BUBBLE_LINES = 34, 6, 8, 4
 
 -- Places a puppet's bubble above it, right edges lined up, kept inside the screen the puppet is on
 -- (below the puppet when there is no room above).
-function obj:bubbleFrame(puppet, width)
+function obj:bubbleFrame(puppet, width, height)
   local top, puppetWidth, puppetHeight = puppet.canvas:topLeft(), W * self.pixel, H * self.pixel
   local center = { x = top.x + puppetWidth / 2, y = top.y + puppetHeight / 2 }
   local screen = hs.screen.mainScreen():frame()
@@ -365,9 +379,9 @@ function obj:bubbleFrame(puppet, width)
   end
   local x = top.x + puppetWidth - width
   x = math.max(screen.x + SCREEN_MARGIN, math.min(x, screen.x + screen.w - width - SCREEN_MARGIN))
-  local y = top.y - BUBBLE_HEIGHT - BUBBLE_GAP
+  local y = top.y - height - BUBBLE_GAP
   if y < screen.y + SCREEN_MARGIN then y = top.y + puppetHeight + BUBBLE_GAP end
-  return { x = x, y = y, w = width, h = BUBBLE_HEIGHT }
+  return { x = x, y = y, w = width, h = height }
 end
 
 local function floating(canvas)
@@ -422,7 +436,10 @@ function obj:layout()
     local puppet = self.stage[key] or self:newPuppet(key)
     puppet.canvas:topLeft({ x = self.anchor.x - (i - 1) * (W * self.pixel + GAP), y = self.anchor.y })
     if self.isShown then puppet.canvas:show() end
-    if puppet.bubble:isShowing() then puppet.bubble:frame(self:bubbleFrame(puppet, puppet.bubble:frame().w)) end
+    if puppet.bubble:isShowing() then
+      local f = puppet.bubble:frame()
+      puppet.bubble:frame(self:bubbleFrame(puppet, f.w, f.h))
+    end
   end
   self.keys = keys
 end
@@ -438,9 +455,10 @@ function obj:render()
     elseif scene == "code" then self:drawCode(buf, texts, s)
     else self:drawIdle(buf, texts, s) end
     if s then
-      texts[#texts + 1] = label(s.tag, 0, 18.6, W, "center", self.pixel)
       local tab = self:tabLabel(s)
-      if tab then texts[#texts + 1] = label(tab, 0, 21.2, W, "center", self.pixel) end
+      for _, element in ipairs(pill(tab and (s.tag .. " · " .. tab) or s.tag, self.pixel)) do
+        texts[#texts + 1] = element
+      end
     end
     local elements = toElements(buf, self.pixel, puppet.colors)
     for _, text in ipairs(texts) do elements[#elements + 1] = text end
@@ -466,13 +484,17 @@ function obj:say(key, text, seconds)
     puppet.bubble:hide()
     return
   end
-  local width = math.min(340, 7 * (utf8.len(text) or #text) + 24)
-  puppet.bubble:frame(self:bubbleFrame(puppet, width))
+  -- No wider than the puppet, so neighbours' bubbles never overlap; long text wraps onto a few lines.
+  local textWidth = 7 * (utf8.len(text) or #text)
+  local width = math.min(W * self.pixel, textWidth + 24)
+  local lines = math.min(BUBBLE_LINES, math.ceil(textWidth / (width - 24)))
+  local height = BUBBLE_HEIGHT + (lines - 1) * 15
+  puppet.bubble:frame(self:bubbleFrame(puppet, width, height))
   puppet.bubble:replaceElements({
     { type = "rectangle", action = "strokeAndFill", fillColor = { white = 1, alpha = 0.95 },
       strokeColor = { hex = puppet.color }, strokeWidth = 2, roundedRectRadii = { xRadius = 10, yRadius = 10 } },
     { type = "text", text = text, textColor = { white = 0.1 }, textSize = 12,
-      frame = { x = 12, y = 8, w = width - 24, h = 20 } },
+      textLineBreak = "wordWrap", frame = { x = 12, y = 8, w = width - 24, h = height - 14 } },
   })
   if self.isShown then puppet.bubble:show() end
   if seconds then puppet.bubbleTimer = hs.timer.doAfter(seconds, function() self:say(key, nil) end) end
