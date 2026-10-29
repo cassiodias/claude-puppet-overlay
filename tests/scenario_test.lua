@@ -54,9 +54,22 @@ local function snapshot(P, title)
     local puppet = P.stage.puppets[key]
     local at = puppet.canvas:topLeft()
     local bubble = puppet.bubble:isShowing() and puppet.bubble.elements[2] and puppet.bubble.elements[2].text or "-"
+    bubble = bubble:gsub("\n", " / ")
     line(string.format("  puppet %d: %s at %d,%d colour %s bubble: %s", i, key, at.x, at.y, puppet.color, bubble))
     draw(puppet, P.pixel)
   end
+end
+
+-- The mouse comes to rest on a puppet, or leaves it; a missed exit is a move without the event.
+local function hover(P, key)
+  local f = P.stage.puppets[key].canvas:frame()
+  stub.mouse = { x = f.x + f.w / 2, y = f.y + f.h / 2 }
+  P.stage.puppets[key].canvas.onMouse(nil, "mouseEnter")
+end
+
+local function leave(P, key, isMissed)
+  stub.mouse = { x = 0, y = 0 }
+  if not isMissed then P.stage.puppets[key].canvas.onMouse(nil, "mouseExit") end
 end
 
 local function menu()
@@ -127,9 +140,23 @@ write("Stop|tab1||||Fixed the parser and added two tests.|app|iTerm.app||/dev/tt
 stub.advance(0.3)
 snapshot(P, "tab1 done")
 
+hover(P, "tab1")
+stub.advance(0.2)
+snapshot(P, "the mouse rests on tab1: its card covers the reply")
+leave(P, "tab1")
+stub.advance(0.2)
+snapshot(P, "the mouse leaves tab1: the reply comes back")
+
 write("SubagentStop|tab2|a1||contract||app|iTerm.app||/dev/ttys002")
 stub.advance(0.3)
 snapshot(P, "a lens is done")
+
+hover(P, "tab2")
+stub.advance(0.2)
+snapshot(P, "the mouse rests on tab2: its subagents in the card")
+leave(P, "tab2", true)
+stub.advance(0.2)
+snapshot(P, "the mouse left tab2 without a mouseExit: the card goes anyway")
 
 stub.advance(40)
 snapshot(P, "a while later: tab1 dozes at its desk")

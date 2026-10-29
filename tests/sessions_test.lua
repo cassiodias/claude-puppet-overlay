@@ -68,4 +68,23 @@ check("so ping pong goes on", Sessions.sceneFor(busy.all.s1, mapping) == "pingpo
 on("UserPromptSubmit", { text = "/build" })
 check("a new /command always wins", busy.all.s1.command == "build" and #busy.all.s1.order == 0)
 
+-- What the status line and card need: when the turn started, and its tool calls.
+local timed = Sessions.new(100)
+local function at(time, name, fields)
+  fields = fields or {}
+  fields.at = time
+  return timed:apply(event(name, fields), { mapping = mapping, harness = fake, frame = 1, now = time })
+end
+at(100, "UserPromptSubmit", { text = "/review" })
+at(110, "PreToolUse", { tool = "look" })
+at(120, "PreToolUse", { tool = "Bash", agentId = "a1" })
+check("a turn remembers when it started", timed.all.s1.turnAt == 100)
+check("every tool call counts, the subagents' too", timed.all.s1.tools == 2)
+check("and the last tool is kept", timed.all.s1.lastTool == "Bash")
+at(130, "UserPromptSubmit", { text = "and the docs too" })
+check("a message during the turn keeps its start", timed.all.s1.turnAt == 100 and timed.all.s1.tools == 2)
+at(140, "Stop", {})
+at(200, "UserPromptSubmit", { text = "/build" })
+check("a new turn starts the clock and the count again", timed.all.s1.turnAt == 200 and timed.all.s1.tools == 0)
+
 check.done("sessions")

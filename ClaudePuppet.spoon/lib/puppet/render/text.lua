@@ -33,4 +33,14 @@ function text.pill(value, px)
   }
 end
 
+-- The status line under the name tag: smaller and light grey, outlined like the labels.
+function text.status(value, px)
+  return {
+    type = "text", frame = { x = 0, y = config.H * px, w = W * px, h = config.STATUS_H * px },
+    text = hs.styledtext.new(value, { font = { name = "Menlo-Bold", size = 2.1 * px }, color = { white = 0.85 },
+      strokeColor = { white = 0 }, strokeWidth = -3,
+      paragraphStyle = { alignment = "center", lineBreak = "truncateTail" } }),
+  }
+end
+
 return text

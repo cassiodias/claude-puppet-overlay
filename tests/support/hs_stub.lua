@@ -1,7 +1,8 @@
 -- A stand-in for the parts of Hammerspoon the Spoon uses: it records what would be drawn, opened or saved,
 -- so the Spoon runs under plain Lua 5.4 with a clock and timers the test moves by hand.
 
-local stub = { canvases = {}, timers = {}, settings = {}, focused = nil, selected = nil, clock = 1000000 }
+local stub = { canvases = {}, timers = {}, settings = {}, focused = nil, selected = nil, clock = 1000000,
+  mouse = { x = 0, y = 0 } }
 
 local function canvas(frame)
   local c = { frame_ = frame, shown = false, elements = {}, deleted = false }
@@ -93,7 +94,7 @@ hs = {
     end,
   },
   styledtext = { new = function(text) return text end },
-  mouse = { absolutePosition = function() return { x = 0, y = 0 } end },
+  mouse = { absolutePosition = function() return { x = stub.mouse.x, y = stub.mouse.y } end },
   eventtap = {
     event = { types = { leftMouseDragged = 6, leftMouseUp = 2 } },
     checkKeyboardModifiers = function() return {} end,

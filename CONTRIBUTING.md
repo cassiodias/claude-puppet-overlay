@@ -16,7 +16,7 @@ ClaudePuppet.spoon/
   lib/puppet/
     config.lua                sizes, timings, colours
     events/                   parse (line → event), reader (follows the file)
-    model/                    sessions (state per session), mapping (command → animation)
+    model/                    sessions (state per session), mapping (command → animation), status (in words)
     harnesses/                the Spoon side of each agent, and the registry
     render/                   pixels, text, sprites, and scenes/ (one file per animation)
     stage/                    the puppet windows and their bubbles
@@ -44,6 +44,7 @@ tests/run.sh
   every frame with `tests/snapshots/scenario.txt`. If you changed a drawing on purpose, record it again with
   `UPDATE=1 lua5.4 tests/scenario_test.lua` and check the diff.
 - `sessions_test.lua` runs the session model with a fake agent.
+- `status_test.lua` checks the status line and the card's text.
 - `harness_contract_test.lua` checks every harness has what the Spoon expects.
 - `harnesses.sh` runs every translator on its fixtures.
 

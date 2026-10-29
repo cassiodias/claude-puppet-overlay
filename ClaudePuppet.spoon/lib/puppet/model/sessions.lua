@@ -87,8 +87,8 @@ function Sessions:apply(e, ctx)
   if not s then
     self.joined = self.joined + 1
     s = {
-      agents = {}, order = {}, score = 0, isWorking = false, readingUntil = 0, summary = "", tappedAt = -100,
-      joinedAt = self.joined, folder = "", tag = "",
+      agents = {}, order = {}, score = 0, tools = 0, isWorking = false, readingUntil = 0, summary = "", tappedAt = -100,
+      joinedAt = self.joined, folder = "", tag = "", turnAt = at,
       -- A session first seen mid-turn has no prompt to judge by: it plays as the main conversation would.
       isListed = mapping.conversation ~= "off",
     }
@@ -111,6 +111,7 @@ function Sessions:apply(e, ctx)
     -- Otherwise it starts a new turn.
     if command or not (s.isWorking or liveAgents(s) > 0) then
       s.agents, s.order, s.score, s.test, s.summary = {}, {}, 0, nil, ""
+      s.turnAt, s.tools, s.lastTool = at, 0, nil
       s.command = command
       s.isListed = mapping:choiceFor(s.command) ~= "off"
       s.tag = e.text ~= "" and e.text:gsub("^/", "") or s.folder
@@ -119,6 +120,8 @@ function Sessions:apply(e, ctx)
     s.mood = "thinking"
     say(nil)
   elseif e.name == "PreToolUse" then
+    s.tools = s.tools + 1
+    if e.tool ~= "" then s.lastTool = e.tool end
     if e.agentId ~= "" and s.agents[e.agentId] then s.agents[e.agentId].hits = s.agents[e.agentId].hits + 1 end
     -- The agent calling a listed skill starts the show mid-turn, as typing its /command does.
     if kind == "skill" and mapping:mappedScene(e.text) then

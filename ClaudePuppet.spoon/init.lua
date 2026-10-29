@@ -18,6 +18,7 @@ local parse = require("puppet.events.parse")
 local Reader = require("puppet.events.reader")
 local Mapping = require("puppet.model.mapping")
 local Sessions = require("puppet.model.sessions")
+local status = require("puppet.model.status")
 local harnesses = require("puppet.harnesses")
 local scenes = require("puppet.render.scenes")
 local Stage = require("puppet.stage.stage")
@@ -29,7 +30,7 @@ local obj = {}
 obj.__index = obj
 
 obj.name = "ClaudePuppet"
-obj.version = "0.9.1"
+obj.version = "0.10.0"
 obj.author = "Cassio Dias"
 obj.license = "MIT - https://opensource.org/licenses/MIT"
 obj.homepage = "https://github.com/cassiodias/claude-puppet-overlay"
@@ -96,15 +97,20 @@ end
 function obj:render()
   self.frame = self.frame + 1
   self:layout()
+  local now = os.time()
+  -- A missed mouseExit must not leave a card behind.
+  if self.hovered and not self:isUnderMouse(self.hovered) then self:hover(self.hovered, false) end
   for _, key in ipairs(self.stage.keys) do
     local puppet, s = self.stage.puppets[key], self.sessions.all[key]
     local tab = s and self.iterm:label(s.tty)
+    if s and key == self.hovered then self.stage:showCard(key, status.card(s, now, tab)) end
     puppet.canvas:replaceElements(scenes.elements(s, {
-      frame = self.frame, pixel = self.pixel, now = os.time(), lastEventAt = self.sessions.lastEventAt,
+      frame = self.frame, pixel = self.pixel, now = now, lastEventAt = self.sessions.lastEventAt,
       scene = s and Sessions.sceneFor(s, self.mapping) or "home",
       monitor = s and self.mapping:choiceFor(s.command) == "matrix" and "matrix" or "invaders",
       harness = harnesses.get(s and s.harness), colors = puppet.colors,
       tag = s and (tab and (s.tag .. " · " .. tab) or s.tag),
+      status = s and status.line(s, now),
     }))
   end
 end
@@ -173,6 +179,24 @@ function obj:startDrag(key)
   self.dragTap:start()
 end
 
+-- Resting the mouse on a puppet shows its card: where it is and what it is doing; render keeps it current.
+function obj:hover(key, isInside)
+  if isInside then
+    self.hovered = key
+    self:render()
+  else
+    if self.hovered == key then self.hovered = nil end
+    self.stage:hideCard(key)
+  end
+end
+
+function obj:isUnderMouse(key)
+  local puppet = self.stage.puppets[key]
+  if not puppet then return false end
+  local f, at = puppet.canvas:frame(), hs.mouse.absolutePosition()
+  return at.x >= f.x and at.x < f.x + f.w and at.y >= f.y and at.y < f.y + f.h
+end
+
 -- Option-click opens the menu bar menu at the puppet, for when the menu bar icon is hidden behind the notch.
 function obj:mouseDown(key)
   if hs.eventtap.checkKeyboardModifiers().alt then
@@ -185,7 +209,7 @@ end
 -- The bottom right corner of a screen, the main one when none is given.
 function obj:defaultPosition(screen)
   local frame = (screen or hs.screen.mainScreen()):frame()
-  return { x = frame.x + frame.w - config.W * self.pixel - 40, y = frame.y + frame.h - config.H * self.pixel - 40 }
+  return { x = frame.x + frame.w - config.W * self.pixel - 40, y = frame.y + frame.h - (config.H + config.STATUS_H) * self.pixel - 40 }
 end
 
 -- Puppets left on a screen that is no longer connected come back to the main screen's corner.
@@ -218,6 +242,7 @@ function obj:start()
     pixel = self.pixel, anchor = anchor,
     onMouseDown = function(key) self:mouseDown(key) end,
     onBubbleClick = function(key) self:focus(key) end,
+    onHover = function(key, isInside) self:hover(key, isInside) end,
   })
   self.screenWatcher = hs.screen.watcher.new(function()
     if not self:isOnAScreen(self.stage.anchor) then self:moveToCorner() end

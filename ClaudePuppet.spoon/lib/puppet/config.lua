@@ -3,6 +3,7 @@
 return {
   W = 48, -- a puppet's drawing, in puppet pixels
   H = 24,
+  STATUS_H = 3, -- the status line under the drawing
   FPS = 10,
   IDLE_SLEEP_SECONDS = 30,
   DONE_SECONDS = 8,

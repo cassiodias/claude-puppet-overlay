@@ -88,9 +88,10 @@ pipe-separated line because translators are shell scripts; JSON would need `jq` 
 | `events/parse.lua`, `events/reader.lua` | read new lines from the events file; replay recent history on start | no |
 | `model/sessions.lua` | the state of each session, changed one event at a time; returns bubbles to show | no |
 | `model/mapping.lua` | which animation each command shows, and what the main conversation shows | no |
+| `model/status.lua` | a session in words: the line under the name tag, and the card shown when the mouse rests on a puppet | no |
 | `harnesses/` | the Spoon side of each harness, and the registry | no |
 | `render/` | pixels, sprites, text, and `scenes/`: one file per animation (`desk`, `monitor`, `invaders`, `matrix`, `pingpong`, `home`) | text styling only |
-| `stage/` | the puppet windows, their layout and bubbles | yes |
+| `stage/` | the puppet windows, their layout, bubbles and cards | yes |
 | `terminals/` | bringing a session's terminal forward; iTerm tab numbers | yes |
 | `ui/menu.lua` | the menu bar menu | yes |
 
@@ -126,6 +127,7 @@ Two behaviours worth knowing:
 | --- | --- |
 | `scenario_test.lua` | the whole Spoon through every scene, with a stand-in for Hammerspoon; every frame is compared with `tests/snapshots/scenario.txt` |
 | `sessions_test.lua` | the session model, driven by a fake harness |
+| `status_test.lua` | the status line and the card |
 | `harness_contract_test.lua` | every harness has what the Spoon expects |
 | `harnesses.sh` | every translator against its fixtures |
 
