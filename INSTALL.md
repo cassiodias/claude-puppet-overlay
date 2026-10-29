@@ -60,21 +60,31 @@ Ask Claude anything in the new session. The puppet thinks, then types; when Clau
 
 To see ping pong, ask Claude for two subagents at once, for example: *"Use two subagents in parallel: one lists this folder, the other prints today's date."*
 
-## Only for some commands
+## Choose what plays
 
-By default the puppets act out every turn. To have them play only while some slash commands or skills run, click the `▟▙` icon in the menu bar:
+By default every turn plays: the coder, or ping pong while subagents run. Click the `▟▙` icon in the menu bar to choose instead:
 
-- Under **Play only for**, each command you typed lately (and each skill Claude called) has a submenu: tick **Play for it**, and pick its scene: **Coder**, **Ping pong**, or **Auto** (ping pong while two subagents run, coder otherwise). **Add command…** adds one it has not seen yet, without the slash.
-- **Play for every turn** goes back to playing for everything.
+```
+Coder:      my-coding-skill, my-planner  …
+Ping pong:  my-reviewer  …
+Main conversation  ▸  Coder
+                      Ping pong while subagents run, else coder
+                      Off
+```
 
-The choice takes effect at once, per session: with `principal-developer` set to Coder and `principal-qa-reviewer` set to Ping pong, the tab running the developer skill gets a puppet that codes, the tab running the reviewer gets one that plays ping pong, and a tab where you just chat gets no puppet. A turn plays when you type a ticked command, or from the moment Claude calls a ticked skill. Hammerspoon remembers the choice across restarts.
+- **Coder** and **Ping pong:** click one to type the slash commands or skills whose turns show that scene, comma separated, with or without the slash. A command is on one list only: adding it to one takes it off the other.
+- **Main conversation:** every other turn, like chatting with Claude or a command on neither list. **Off** keeps those turns quiet, so only your listed commands get a puppet.
+
+A turn plays from when you type a listed command, or from when Claude calls a listed skill. Changes apply at once, to every tab, and Hammerspoon keeps them across restarts.
 
 Menu bar icon hidden behind the notch? **Option-click any puppet** to open the same menu.
 
 If you prefer a file, set the starting choice in `~/.hammerspoon/init.lua`, before the `start()` line (the menu's choice wins once you have used it):
 
 ```lua
-spoon.ClaudePuppet.commands = { "code-review", "my-coding-skill" }
+spoon.ClaudePuppet.coder = { "my-coding-skill" }
+spoon.ClaudePuppet.pingpong = { "my-reviewer" }
+spoon.ClaudePuppet.conversation = "off"  -- or "coder", or "auto"
 ```
 
 `spoon.ClaudePuppet.pixel = 5` makes the puppets bigger (the default is 4).

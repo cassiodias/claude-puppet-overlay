@@ -11,16 +11,27 @@ local obj = {}
 obj.__index = obj
 
 obj.name = "ClaudePuppet"
-obj.version = "0.6.2"
+obj.version = "0.7.0"
 obj.author = "Cassio Dias"
 obj.license = "MIT - https://opensource.org/licenses/MIT"
 obj.homepage = "https://github.com/cassiodias/claude-puppet-overlay"
 
---- ClaudePuppet.commands
+--- ClaudePuppet.coder
 --- Variable
---- Slash commands that play a scene, without the slash; empty plays one for every turn.
---- The starting choice: once you tick commands in the menu bar, that choice is kept instead.
-obj.commands = {}
+--- Slash commands or skills whose turns show the coder, without the slash.
+obj.coder = {}
+
+--- ClaudePuppet.pingpong
+--- Variable
+--- Slash commands or skills whose turns show ping pong, without the slash.
+obj.pingpong = {}
+
+--- ClaudePuppet.conversation
+--- Variable
+--- What the main conversation shows (any turn whose command is on neither list):
+--- "coder", "auto" (ping pong while subagents run, coder otherwise) or "off".
+--- These three are the starting choice; once you change them in the menu bar, that choice is kept instead.
+obj.conversation = "auto"
 
 --- ClaudePuppet.pixel
 --- Variable
@@ -42,12 +53,10 @@ local GAP = 12
 local PALETTE = { "#D97757", "#5B8DEF", "#A06CD5", "#4FB286", "#E0A43B" }
 local CLICK_DISTANCE = 4
 local POSITION_KEY = "ClaudePuppet.position"
-local SCENES_KEY = "ClaudePuppet.scenes"
--- What a command's turns show: auto plays ping pong while two subagents run and codes otherwise.
-local SCENE_CHOICES = { { "auto", "Auto: ping pong with subagents, else coder" }, { "coder", "Coder" }, { "pingpong", "Ping pong" } }
-local COMMANDS_KEY = "ClaudePuppet.commands"
-local SEEN_KEY = "ClaudePuppet.seenCommands"
-local SEEN_LIMIT = 15
+local CHOICE_KEY = "ClaudePuppet.choice"
+local CONVERSATION_CHOICES = {
+  { "coder", "Coder" }, { "auto", "Ping pong while subagents run, else coder" }, { "off", "Off" },
+}
 
 local COLORS = {
   c = { hex = "#D97757" }, -- the puppet
@@ -226,16 +235,20 @@ local function split(line)
 end
 
 local function contains(commands, command)
-  local name = (command or ""):gsub("^/", "")
   for _, listed in ipairs(commands) do
-    if listed:gsub("^/", "") == name then return true end
+    if listed == command then return true end
   end
   return false
 end
 
--- An empty commands list plays every turn.
-local function isListed(commands, command)
-  return #commands == 0 or contains(commands, command)
+-- Commands as typed in the menu: comma or space separated, slash optional.
+local function parseCommands(typed)
+  local commands = {}
+  for name in (typed or ""):gmatch("[^,%s]+") do
+    name = name:gsub("^/", "")
+    if name ~= "" and not contains(commands, name) then commands[#commands + 1] = name end
+  end
+  return commands
 end
 
 -- The puppet's pose at the desk: typing, thinking, a raised hand, a sign asking for permission,
@@ -369,9 +382,14 @@ function obj:sceneFor(s)
   if not s.isListed then return "rest" end
   if s.mood == "asking" or s.mood == "permission" then return "code" end
   if not (s.isWorking or live > 0) then return "rest" end
-  local choice = s.command and self.scenes[s.command] or "auto"
+  local choice = self:choiceFor(s.command)
   if choice == "pingpong" or (choice == "auto" and #s.order >= 2 and live > 0) then return "pingpong" end
   return "code"
+end
+
+-- A session playing now gets a puppet, which it keeps until it leaves the stage.
+local function markPlayed(s)
+  if s.isListed and (s.isWorking or s.mood ~= nil or liveAgents(s) > 0) then s.hasPlayed = true end
 end
 
 -- A session that has played keeps its puppet and desk until it ends, its iTerm tab closes,
@@ -558,8 +576,8 @@ function obj:handle(line)
     s = {
       agents = {}, order = {}, score = 0, isWorking = false, readingUntil = 0, summary = "", tappedAt = -100,
       joinedAt = self.joined, folder = "", tag = "",
-      -- A session first seen mid-turn has no prompt to judge by: it plays unless a commands list is set.
-      isListed = #self.commands == 0,
+      -- A session first seen mid-turn has no prompt to judge by: it plays as the main conversation would.
+      isListed = self.conversation ~= "off",
     }
     self.sessions[sid] = s
   end
@@ -573,16 +591,14 @@ function obj:handle(line)
   if event == "UserPromptSubmit" then
     s.agents, s.order, s.score, s.isWorking, s.test, s.summary = {}, {}, 0, true, nil, ""
     s.command = text:match("^/(%S+)")
-    if s.command then self:remember(s.command) end
-    s.isListed = isListed(self.commands, text)
+    s.isListed = self:choiceFor(s.command) ~= "off"
     s.tag = text ~= "" and text:gsub("^/", "") or s.folder
     s.mood = "thinking"
     self:say(sid, nil)
   elseif event == "PreToolUse" then
     if aid ~= "" and s.agents[aid] then s.agents[aid].hits = s.agents[aid].hits + 1 end
     -- Claude calling a listed skill starts the show mid-turn, as typing its /command does.
-    if tool == "Skill" and text ~= "" then self:remember(text) end
-    if tool == "Skill" and contains(self.commands, text) then
+    if tool == "Skill" and (contains(self.coder, text) or contains(self.pingpong, text)) then
       s.isListed, s.tag, s.command = true, text, text
     end
     if aid == "" then
@@ -625,83 +641,87 @@ function obj:handle(line)
     -- Background subagents may still be working; the last one to stop says it then.
     self:finish(sid, s)
   end
-  if s.isListed and (s.isWorking or s.mood ~= nil or liveAgents(s) > 0) then s.hasPlayed = true end
+  markPlayed(s)
 end
 
--- Keeps the commands and skills seen lately, newest first, for the menu to offer.
-function obj:remember(command)
-  local seen = { command }
-  for _, other in ipairs(self.seen) do
-    if other ~= command and #seen < SEEN_LIMIT then seen[#seen + 1] = other end
-  end
-  self.seen = seen
-  hs.settings.set(SEEN_KEY, seen)
+-- What a turn's command shows: its list's scene, or the main conversation's choice for anything else.
+function obj:choiceFor(command)
+  if command and contains(self.coder, command) then return "coder" end
+  if command and contains(self.pingpong, command) then return "pingpong" end
+  return self.conversation
 end
 
--- Applies a new commands choice at once: each session plays if its current turn's command is now listed.
-function obj:setCommands(commands)
-  self.commands = commands
-  hs.settings.set(COMMANDS_KEY, commands)
+-- Keeps the choice and applies it at once to every session's current turn.
+function obj:saveChoice()
+  hs.settings.set(CHOICE_KEY, { coder = self.coder, pingpong = self.pingpong, conversation = self.conversation })
   for _, s in pairs(self.sessions) do
-    s.isListed = #commands == 0 or (s.command ~= nil and contains(commands, s.command))
+    s.isListed = self:choiceFor(s.command) ~= "off"
+    markPlayed(s)
   end
 end
 
-function obj:setScene(command, scene)
-  self.scenes[command] = scene ~= "auto" and scene or nil
-  hs.settings.set(SCENES_KEY, self.scenes)
-end
-
-function obj:toggleCommand(command)
-  local commands, isRemoved = {}, false
-  for _, listed in ipairs(self.commands) do
-    if listed:gsub("^/", "") == command then isRemoved = true else commands[#commands + 1] = listed end
-  end
-  if not isRemoved then commands[#commands + 1] = command end
-  self:setCommands(commands)
-end
-
-function obj:addCommand()
+-- Edits one scene's commands as text; a command moves out of the other scene's list.
+function obj:editScene(scene)
+  local names = { coder = "Coder", pingpong = "Ping pong" }
+  local other = scene == "coder" and "pingpong" or "coder"
   hs.focus()
-  local button, typed = hs.dialog.textPrompt("Play for a command", "The slash command or skill, like principal-developer",
-    "", "Add", "Cancel")
-  local command = (typed or ""):gsub("^%s*/?", ""):gsub("%s.*$", "")
-  if button ~= "Add" or command == "" then return end
-  self:remember(command)
-  if not contains(self.commands, command) then self:toggleCommand(command) end
+  local button, typed = hs.dialog.textPrompt(names[scene],
+    "Commands or skills whose turns show the " .. names[scene]:lower() .. ", comma separated, like my-coding-skill",
+    table.concat(self[scene], ", "), "Save", "Cancel")
+  if button ~= "Save" then return end
+  self[scene] = parseCommands(typed)
+  local kept = {}
+  for _, command in ipairs(self[other]) do
+    if not contains(self[scene], command) then kept[#kept + 1] = command end
+  end
+  self[other] = kept
+  self:saveChoice()
 end
 
--- The menu bar menu: show or hide, which commands play, and which screen the puppets sit on.
+-- The menu bar menu: show or hide, the commands each scene plays for, the main conversation, and the screen.
 function obj:menuItems()
+  local function listed(commands) return #commands > 0 and table.concat(commands, ", ") or "no commands yet" end
+  local conversation = {}
+  for _, choice in ipairs(CONVERSATION_CHOICES) do
+    conversation[#conversation + 1] = { title = choice[2], checked = self.conversation == choice[1], fn = function()
+      self.conversation = choice[1]
+      self:saveChoice()
+    end }
+  end
   local items = {
     { title = self.isShown and "Hide puppets" or "Show puppets", fn = function() self:toggle() end },
     { title = "-" },
-    { title = "Play for every turn", checked = #self.commands == 0, fn = function() self:setCommands({}) end },
-    { title = "Play only for:", disabled = true },
+    { title = "Coder:  " .. listed(self.coder) .. "  …", fn = function() self:editScene("coder") end },
+    { title = "Ping pong:  " .. listed(self.pingpong) .. "  …", fn = function() self:editScene("pingpong") end },
+    { title = "Main conversation", menu = conversation },
+    { title = "-" },
   }
-  local offered = {}
-  for _, command in ipairs(self.commands) do offered[#offered + 1] = command:gsub("^/", "") end
-  for _, command in ipairs(self.seen) do
-    if not contains(offered, command) then offered[#offered + 1] = command end
-  end
-  for _, command in ipairs(offered) do
-    local isOn = contains(self.commands, command)
-    local scene = self.scenes[command] or "auto"
-    local submenu = { { title = "Play for " .. command, checked = isOn, fn = function() self:toggleCommand(command) end },
-      { title = "-" } }
-    for _, choice in ipairs(SCENE_CHOICES) do
-      submenu[#submenu + 1] = { title = choice[2], checked = scene == choice[1],
-        fn = function() self:setScene(command, choice[1]) end }
-    end
-    local shown = scene == "auto" and "" or (" · " .. (scene == "coder" and "coder" or "ping pong"))
-    items[#items + 1] = { title = "    " .. command .. shown, checked = isOn, menu = submenu }
-  end
-  items[#items + 1] = { title = "    Add command…", fn = function() self:addCommand() end }
-  items[#items + 1] = { title = "-" }
   for _, screen in ipairs(hs.screen.allScreens()) do
     items[#items + 1] = { title = "Move to " .. screen:name(), fn = function() self:moveToCorner(screen) end }
   end
   return items
+end
+
+-- The menu's saved choice, or the variables above; a choice saved by an older version is carried over.
+function obj:loadChoice()
+  local saved = hs.settings.get(CHOICE_KEY)
+  if not saved then
+    local commands, scenes = hs.settings.get("ClaudePuppet.commands"), hs.settings.get("ClaudePuppet.scenes") or {}
+    if commands then
+      saved = { coder = {}, pingpong = {}, conversation = #commands == 0 and "auto" or "off" }
+      for _, command in ipairs(commands) do
+        local list = scenes[command] == "pingpong" and saved.pingpong or saved.coder
+        list[#list + 1] = command
+      end
+    end
+    for _, key in ipairs({ "ClaudePuppet.commands", "ClaudePuppet.scenes", "ClaudePuppet.seenCommands" }) do
+      hs.settings.clear(key)
+    end
+  end
+  if saved then
+    self.coder, self.pingpong, self.conversation = saved.coder or {}, saved.pingpong or {}, saved.conversation or "auto"
+    hs.settings.set(CHOICE_KEY, saved)
+  end
 end
 
 -- Reads the lines the hook appended since the last read; a file that shrank was emptied, so it starts over.
@@ -864,9 +884,7 @@ function obj:start()
   end)
   self.screenWatcher:start()
   self.frame, self.lastEventAt, self.joined, self.isShown = 0, os.time(), 0, true
-  self.commands = hs.settings.get(COMMANDS_KEY) or self.commands
-  self.seen = hs.settings.get(SEEN_KEY) or {}
-  self.scenes = hs.settings.get(SCENES_KEY) or {}
+  self:loadChoice()
   self.sessions, self.stage, self.keys, self.tabs, self.iTermWindows = {}, {}, {}, {}, 0
   -- Replays the last hours of events, without bubbles, so a restart finds every session as it was.
   self.offset, self.replayFrom = 0, os.time() - STALE_SECONDS
