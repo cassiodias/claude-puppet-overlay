@@ -1,7 +1,8 @@
 #!/bin/sh
 # Claude Code runs this on each hook event: it appends one short line for the floating puppet to read.
 # Line: time|event|session|agent|tool|agent type|text|folder|terminal app|flag
-# Kept: a prompt's leading /command, a notification, the first sentence of Claude's reply; never commands or code.
+# Kept: a prompt's leading /command, a skill Claude calls, a notification, the first sentence of Claude's reply;
+# never commands or code.
 
 dir="$HOME/.claude-puppet"
 file="$dir/events"
@@ -32,6 +33,7 @@ case "$event" in
   Notification) text=$(field message) ;;
   Stop) text=$(first_sentence) ;;
 esac
+[ "$tool" = "Skill" ] && text=$(field tool_input.skill)
 if [ "$tool" = "Bash" ]; then
   case " $(field tool_input.command) " in
     *pytest*|*"npm test"*|*"npm run test"*|*"yarn test"*|*"pnpm test"*|*"go test"*|*"cargo test"*|*jest*|*vitest*|*rspec*|*"mvn test"*|*"gradle test"*|*"make test"*|*" tox "*|*unittest*)

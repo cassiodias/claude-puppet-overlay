@@ -61,7 +61,7 @@ To see ping pong, ask Claude for two subagents at once, for example: *"Use two s
 
 ## Only for some commands
 
-By default the puppet acts out every turn. To have it play only while some slash commands run, list them in `~/.hammerspoon/init.lua`, before the `start()` line:
+By default the puppet acts out every turn. To have it play only while some slash commands or skills run, list them in `~/.hammerspoon/init.lua`, before the `start()` line:
 
 ```lua
 hs.loadSpoon("ClaudePuppet")
@@ -69,7 +69,7 @@ spoon.ClaudePuppet.commands = { "code-review", "my-coding-skill" }
 spoon.ClaudePuppet:start()
 ```
 
-Then **Reload Config**. Other turns leave the puppet idle. `spoon.ClaudePuppet.pixel = 5` makes it bigger (the default is 4).
+Then **Reload Config**. A turn plays when you type one of them (`/my-coding-skill ...`) or when Claude calls one through its Skill tool, from that call on. Other turns leave the puppet idle. `spoon.ClaudePuppet.pixel = 5` makes it bigger (the default is 4).
 
 ## Update
 

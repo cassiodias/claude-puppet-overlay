@@ -11,7 +11,7 @@ local obj = {}
 obj.__index = obj
 
 obj.name = "ClaudePuppet"
-obj.version = "0.2.2"
+obj.version = "0.2.3"
 obj.author = "Cassio Dias"
 obj.license = "MIT - https://opensource.org/licenses/MIT"
 obj.homepage = "https://github.com/cassiodias/claude-puppet-overlay"
@@ -412,6 +412,8 @@ function obj:handle(line)
     self:say(nil)
   elseif event == "PreToolUse" then
     if aid ~= "" and s.agents[aid] then s.agents[aid].hits = s.agents[aid].hits + 1 end
+    -- Claude calling a listed skill starts the show mid-turn, as typing its /command does.
+    if tool == "Skill" and #self.commands > 0 and isListed(self.commands, text) then s.isListed = true end
     if aid == "" then
       s.isWorking = true
       s.mood = nil
