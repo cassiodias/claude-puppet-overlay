@@ -69,21 +69,23 @@ Run Claude in a second tab and a second puppet, in another colour, sits down nex
 
 ## Choose what plays
 
-By default every turn plays: the coder, or ping pong while subagents run. To choose, click the `▟▙` icon in the menu bar:
+There are three animations: **Coder** (the puppet shoots invaders on its monitor), **Matrix** (the same desk, with green code rain on the monitor) and **Ping pong** (two puppets, one per subagent). By default every turn plays: the coder, or ping pong while subagents run. To choose, click the `▟▙` icon in the menu bar:
 
 ```
 Hide puppets
 Animation to Commands Mapping
-    Coder:      my-coding-skill, my-planner  …
+    Coder:      my-coding-skill  …
+    Matrix:     my-planner  …
     Ping pong:  my-reviewer  …
 Main conversation:
       Coder
+      Matrix
     ✓ Ping pong while subagents run, else coder
       Off
 Move to <each of your screens>
 ```
 
-- **Coder** and **Ping pong:** click one, and type the slash commands or skills whose turns show that animation, comma separated, with or without the slash. A command is on one list only: adding it to one takes it off the other.
+- **Coder**, **Matrix** and **Ping pong:** click one, and type the slash commands or skills whose turns show that animation, comma separated, with or without the slash. A command is on one list only: adding it to one takes it off the others.
 - **Main conversation:** every other turn, like chatting with Claude, or a command on neither list. **Off** keeps those turns quiet, so only your listed commands get a puppet.
 
 A turn plays from when you type a listed command, or from when Claude calls a listed skill. Changes apply at once to every tab, and Hammerspoon keeps them across restarts.
@@ -94,8 +96,9 @@ If you prefer a file, set the starting choice in `~/.hammerspoon/init.lua`, befo
 
 ```lua
 spoon.ClaudePuppet.coder = { "my-coding-skill" }
+spoon.ClaudePuppet.matrix = { "my-planner" }
 spoon.ClaudePuppet.pingpong = { "my-reviewer" }
-spoon.ClaudePuppet.conversation = "off"  -- or "coder", or "auto"
+spoon.ClaudePuppet.conversation = "off"  -- or "coder", "matrix", "auto"
 ```
 
 `spoon.ClaudePuppet.pixel = 5` makes the puppets bigger (the default is 4).

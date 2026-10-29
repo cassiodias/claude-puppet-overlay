@@ -5,7 +5,7 @@ Claude puppets that float over your Mac desktop, like the old Office paperclip, 
 | When Claude is... | The puppet... |
 | --- | --- |
 | reading your prompt | rests its chin on its paw, with a thought bubble |
-| working | types on its laptop and shoots an invader on its monitor with every tool call; now and then it turns to smile at you |
+| working | types on its laptop and shoots an invader on its monitor with every tool call, or watches green Matrix rain pour faster with each one; now and then it turns to smile at you |
 | reading or searching files | moves a magnifying glass over the monitor |
 | running tests | shows a progress bar, then a green ✓ or a red ✗ |
 | running subagents | plays ping pong: two puppets, one per subagent, each scoring its own tool calls |
@@ -15,7 +15,7 @@ Claude puppets that float over your Mac desktop, like the old Office paperclip, 
 | between turns | rests at its desk with the monitor off, and dozes off after a while |
 
 - **One puppet per session:** with one tab coding and another reviewing, two puppets sit side by side, each in its own colour, with a name tag (the command you ran, or the project folder), its own scene and its own bubble. Between turns a puppet rests at its desk with the monitor off, and dozes; it leaves when its session ends or its iTerm tab closes. With no session on stage, one puppet waits at home.
-- **Choose what plays** from the `▟▙` menu bar icon (or Option-click a puppet): list `my-coding-skill` under Coder and `my-reviewer` under Ping pong, and set the main conversation to Coder, auto or Off. Each tab's puppet follows the command that tab runs.
+- **Choose what plays** from the `▟▙` menu bar icon (or Option-click a puppet): list `my-coding-skill` under Coder, `my-planner` under Matrix and `my-reviewer` under Ping pong, and set the main conversation to Coder, Matrix, auto or Off. Each tab's puppet follows the command that tab runs.
 - **Click a puppet** (or its bubble) to jump to the terminal running that session. In iTerm2 it selects the exact window and tab, and the tab number is written under the puppet's table (`tab 3`, or `window 2 · tab 3` with several windows).
 - **Drag any puppet** to move the whole row, across screens too; it stays on top of every app and every desktop. The `▟▙` menu bar icon sends the row to the corner of any screen, and puppets left on a screen you unplug come back to the main one.
 

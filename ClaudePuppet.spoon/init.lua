@@ -1,7 +1,7 @@
 --- === ClaudePuppet ===
 ---
 --- Claude puppets that float over your desktop, one per busy Claude Code session, acting out what it is doing:
---- it thinks, codes at its laptop, reads, runs tests, plays ping pong while subagents run,
+--- it thinks, codes at its laptop (invaders or Matrix rain on its monitor), reads, runs tests, plays ping pong while subagents run,
 --- raises a hand when Claude asks you something, and says what Claude did when it is done.
 --- Click a puppet to jump to its session's terminal.
 ---
@@ -11,7 +11,7 @@ local obj = {}
 obj.__index = obj
 
 obj.name = "ClaudePuppet"
-obj.version = "0.7.2"
+obj.version = "0.8.0"
 obj.author = "Cassio Dias"
 obj.license = "MIT - https://opensource.org/licenses/MIT"
 obj.homepage = "https://github.com/cassiodias/claude-puppet-overlay"
@@ -26,10 +26,15 @@ obj.coder = {}
 --- Slash commands or skills whose turns show ping pong, without the slash.
 obj.pingpong = {}
 
+--- ClaudePuppet.matrix
+--- Variable
+--- Slash commands or skills whose turns show the coder with Matrix rain on its monitor, without the slash.
+obj.matrix = {}
+
 --- ClaudePuppet.conversation
 --- Variable
 --- What the main conversation shows (any turn whose command is on neither list):
---- "coder", "auto" (ping pong while subagents run, coder otherwise) or "off".
+--- "coder", "matrix", "auto" (ping pong while subagents run, coder otherwise) or "off".
 --- These three are the starting choice; once you change them in the menu bar, that choice is kept instead.
 obj.conversation = "auto"
 
@@ -55,8 +60,10 @@ local CLICK_DISTANCE = 4
 local POSITION_KEY = "ClaudePuppet.position"
 local CHOICE_KEY = "ClaudePuppet.choice"
 local CONVERSATION_CHOICES = {
-  { "coder", "Coder" }, { "auto", "Ping pong while subagents run, else coder" }, { "off", "Off" },
+  { "coder", "Coder" }, { "matrix", "Matrix" }, { "auto", "Ping pong while subagents run, else coder" }, { "off", "Off" },
 }
+-- The animations a list of commands can map to, in menu order.
+local SCENES = { { "coder", "Coder" }, { "matrix", "Matrix" }, { "pingpong", "Ping pong" } }
 
 local COLORS = {
   c = { hex = "#D97757" }, -- the puppet
@@ -70,6 +77,9 @@ local COLORS = {
   b = { hex = "#8A6A4F" }, -- desk
   t = { hex = "#2E6B4F" }, -- ping pong table
   p = { hex = "#6BBF59" }, -- tests passed
+  m = { hex = "#C8FFC0" }, -- Matrix rain, the falling head
+  n = { hex = "#3FB950" }, -- Matrix rain, the trail
+  o = { hex = "#1B5E20" }, -- Matrix rain, the fading end
   r = { hex = "#E5534B" }, -- tests failed
 }
 
@@ -303,6 +313,10 @@ function obj:drawMonitor(buf, texts, s, isResting)
     stamp(buf, LENS, 19 + bounce(frame, 20), 6)
     return
   end
+  if self:choiceFor(s.command) == "matrix" then
+    self:drawRain(buf, s)
+    return
+  end
   local march = bounce(frame // 5, 3)
   local at = function(slot) return 19 + march + (slot - 1) * 6 end
   local killed = s.score % #WAVE_ORDER
@@ -316,6 +330,27 @@ function obj:drawMonitor(buf, texts, s, isResting)
   local ship = isShooting and at(target) or 19 + bounce(frame // 2, 21)
   if isShooting and age < 4 then fill(buf, ship + 2, 13 - age * 2, ship + 2, 14 - age * 2, "w") end
   stamp(buf, SHIP, ship, 15)
+end
+
+-- Matrix rain on the monitor: every other column falls at its own speed, a bright head over a fading trail,
+-- with glyph-like gaps that flicker; it pours faster for a moment after each tool call.
+function obj:drawRain(buf, s)
+  local frame, top, bottom = self.frame, 2, 17
+  local rows = bottom - top + 1
+  local surge = frame - s.tappedAt < 10 and 2 or 1
+  for x = 18, W - 3, 2 do
+    local seed = (x * 7919) % 97
+    local speed, length = 1 + seed % 3, 5 + seed % 6
+    local head = (frame * speed * surge // 2 + seed) % (rows + length)
+    for back = 0, length - 1 do
+      local y = top + head - back
+      local isGlyph = (x * 31 + (y + frame // 3) * 17) % 5 ~= 0
+      if y >= top and y <= bottom and (back == 0 or isGlyph) then
+        local key = back == 0 and "m" or (back < length * 2 / 3 and "n" or "o")
+        fill(buf, x, y, x, y, key)
+      end
+    end
+  end
 end
 
 -- The puppet at its desk, with a small `_|` laptop under its paws and a monitor; resting, the monitor is off.
@@ -598,7 +633,7 @@ function obj:handle(line)
   elseif event == "PreToolUse" then
     if aid ~= "" and s.agents[aid] then s.agents[aid].hits = s.agents[aid].hits + 1 end
     -- Claude calling a listed skill starts the show mid-turn, as typing its /command does.
-    if tool == "Skill" and (contains(self.coder, text) or contains(self.pingpong, text)) then
+    if tool == "Skill" and self:mappedScene(text) then
       s.isListed, s.tag, s.command = true, text, text
     end
     if aid == "" then
@@ -646,35 +681,43 @@ end
 
 -- What a turn's command shows: its list's scene, or the main conversation's choice for anything else.
 function obj:choiceFor(command)
-  if command and contains(self.coder, command) then return "coder" end
-  if command and contains(self.pingpong, command) then return "pingpong" end
-  return self.conversation
+  return self:mappedScene(command) or self.conversation
+end
+
+-- The animation a command is listed under, if any.
+function obj:mappedScene(command)
+  for _, scene in ipairs(SCENES) do
+    if command and contains(self[scene[1]], command) then return scene[1] end
+  end
 end
 
 -- Keeps the choice and applies it at once to every session's current turn.
 function obj:saveChoice()
-  hs.settings.set(CHOICE_KEY, { coder = self.coder, pingpong = self.pingpong, conversation = self.conversation })
+  hs.settings.set(CHOICE_KEY,
+    { coder = self.coder, matrix = self.matrix, pingpong = self.pingpong, conversation = self.conversation })
   for _, s in pairs(self.sessions) do
     s.isListed = self:choiceFor(s.command) ~= "off"
     markPlayed(s)
   end
 end
 
--- Edits one scene's commands as text; a command moves out of the other scene's list.
-function obj:editScene(scene)
-  local names = { coder = "Coder", pingpong = "Ping pong" }
-  local other = scene == "coder" and "pingpong" or "coder"
+-- Edits one animation's commands as text; a command moves out of the other animations' lists.
+function obj:editScene(scene, name)
   hs.focus()
-  local button, typed = hs.dialog.textPrompt(names[scene],
-    "Commands or skills whose turns show the " .. names[scene]:lower() .. ", comma separated, like my-coding-skill",
+  local button, typed = hs.dialog.textPrompt(name,
+    "Commands or skills whose turns show " .. name .. ", comma separated, like my-coding-skill",
     table.concat(self[scene], ", "), "Save", "Cancel")
   if button ~= "Save" then return end
   self[scene] = parseCommands(typed)
-  local kept = {}
-  for _, command in ipairs(self[other]) do
-    if not contains(self[scene], command) then kept[#kept + 1] = command end
+  for _, other in ipairs(SCENES) do
+    if other[1] ~= scene then
+      local kept = {}
+      for _, command in ipairs(self[other[1]]) do
+        if not contains(self[scene], command) then kept[#kept + 1] = command end
+      end
+      self[other[1]] = kept
+    end
   end
-  self[other] = kept
   self:saveChoice()
 end
 
@@ -685,11 +728,13 @@ function obj:menuItems()
     { title = self.isShown and "Hide puppets" or "Show puppets", fn = function() self:toggle() end },
     { title = "-" },
     { title = "Animation to Commands Mapping", disabled = true },
-    { title = "    Coder:  " .. listed(self.coder) .. "  …", fn = function() self:editScene("coder") end },
-    { title = "    Ping pong:  " .. listed(self.pingpong) .. "  …", fn = function() self:editScene("pingpong") end },
-    { title = "-" },
-    { title = "Main conversation:", disabled = true },
   }
+  for _, scene in ipairs(SCENES) do
+    items[#items + 1] = { title = "    " .. scene[2] .. ":  " .. listed(self[scene[1]]) .. "  …",
+      fn = function() self:editScene(scene[1], scene[2]) end }
+  end
+  items[#items + 1] = { title = "-" }
+  items[#items + 1] = { title = "Main conversation:", disabled = true }
   for _, choice in ipairs(CONVERSATION_CHOICES) do
     items[#items + 1] = { title = "    " .. choice[2], checked = self.conversation == choice[1], fn = function()
       self.conversation = choice[1]
@@ -709,7 +754,7 @@ function obj:loadChoice()
   if not saved then
     local commands, scenes = hs.settings.get("ClaudePuppet.commands"), hs.settings.get("ClaudePuppet.scenes") or {}
     if commands then
-      saved = { coder = {}, pingpong = {}, conversation = #commands == 0 and "auto" or "off" }
+      saved = { coder = {}, matrix = {}, pingpong = {}, conversation = #commands == 0 and "auto" or "off" }
       for _, command in ipairs(commands) do
         local list = scenes[command] == "pingpong" and saved.pingpong or saved.coder
         list[#list + 1] = command
@@ -720,7 +765,8 @@ function obj:loadChoice()
     end
   end
   if saved then
-    self.coder, self.pingpong, self.conversation = saved.coder or {}, saved.pingpong or {}, saved.conversation or "auto"
+    self.coder, self.matrix, self.pingpong = saved.coder or {}, saved.matrix or {}, saved.pingpong or {}
+    self.conversation = saved.conversation or "auto"
     hs.settings.set(CHOICE_KEY, saved)
   end
 end
