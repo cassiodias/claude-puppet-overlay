@@ -1,0 +1,12 @@
+{
+  "session_id": "s1",
+  "cwd": "/Users/dev/workspace/my-app",
+  "transcript_path": "/tmp/t.jsonl",
+  "hook_event_name": "PreToolUse",
+  "tool_name": "Edit",
+  "tool_input": {
+    "file_path": "/a/b.py",
+    "old_string": "x|y",
+    "new_string": "z"
+  }
+}

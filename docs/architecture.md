@@ -1,7 +1,8 @@
 # Architecture: from one file to components
 
-Status: proposal. The puppets work today from one 969-line `ClaudePuppet.spoon/init.lua` and one hook script for
-Claude Code. This splits the Spoon into small modules, so that new coding agents (Codex, Cursor, Antigravity,
+Status: steps 1 to 4 of the migration plan are done (version 0.9.0): the Spoon is split into the modules
+below, and Claude Code is the first harness. Before, the puppets ran from one 969-line `ClaudePuppet.spoon/init.lua`
+and one hook script. This splits the Spoon into small modules, so that new coding agents (Codex, Cursor, Antigravity,
 OpenCode) can feed the same puppets, and new animations can be added without touching the rest.
 
 ## 1. Requirements

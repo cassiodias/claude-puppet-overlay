@@ -17,11 +17,10 @@ brew install --cask hammerspoon
 ```sh
 git clone https://github.com/cassiodias/claude-puppet-overlay.git ~/.claude-puppet/src
 mkdir -p ~/.hammerspoon/Spoons
-cp -R ~/.claude-puppet/src/ClaudePuppet.spoon ~/.hammerspoon/Spoons/
-cp ~/.claude-puppet/src/hook/claude-puppet-hook.sh ~/.claude-puppet/hook.sh
+ln -sfn ~/.claude-puppet/src/ClaudePuppet.spoon ~/.hammerspoon/Spoons/ClaudePuppet.spoon
 ```
 
-This puts the source in `~/.claude-puppet/src`, the hook in `~/.claude-puppet/hook.sh` and the puppets in `~/.hammerspoon/Spoons/ClaudePuppet.spoon`. If `~/.claude-puppet/src` already exists, you installed before: follow [Update](#update) instead.
+This puts the source in `~/.claude-puppet/src` and links Hammerspoon's `~/.hammerspoon/Spoons/ClaudePuppet.spoon` to it, so an update is a `git pull`. If `~/.claude-puppet/src` already exists, you installed before: follow [Update](#update) instead.
 
 ## 3. Load the puppets in Hammerspoon
 
@@ -45,11 +44,11 @@ cp ~/.claude/settings.json ~/.claude/settings.json.bak
 jq '.hooks |= ((. // {}) | with_entries(.value |= map(select(all(.hooks[]; .command | test("claude-puppet") | not)))) | with_entries(select(.value | length > 0)))' \
   ~/.claude/settings.json > /tmp/claude-puppet-clean.json
 jq -s '.[0] as $mine | .[1].hooks as $add | $mine | .hooks = (reduce ($add | keys[]) as $e (($mine.hooks // {}); .[$e] = ((.[$e] // []) + $add[$e])))' \
-  /tmp/claude-puppet-clean.json hook/hooks.json > ~/.claude/settings.json
+  /tmp/claude-puppet-clean.json harnesses/claude/hooks.json > ~/.claude/settings.json
 rm /tmp/claude-puppet-clean.json
 ```
 
-This adds the puppet's hook to your user settings, `~/.claude/settings.json`, for these Claude Code events: prompt submitted, before and after each tool call, tool failure, permission request, subagent start and stop, notification, stop and session end. It saves a backup to `~/.claude/settings.json.bak` first, keeps everything else in the file (your other hooks included), and replaces any puppet hooks already there, so it is safe to run again.
+This adds the puppet's hook, `~/.claude-puppet/src/harnesses/claude/translate.sh`, to your user settings, `~/.claude/settings.json`, for these Claude Code events: prompt submitted, before and after each tool call, tool failure, permission request, subagent start and stop, notification, stop and session end. It saves a backup to `~/.claude/settings.json.bak` first, keeps everything else in the file (your other hooks included), and replaces any puppet hooks already there, so it is safe to run again.
 
 ## 5. Things only you can do
 
@@ -107,8 +106,6 @@ spoon.ClaudePuppet.conversation = "off"  -- or "coder", "matrix", "auto"
 
 ```sh
 git -C ~/.claude-puppet/src pull
-cp -R ~/.claude-puppet/src/ClaudePuppet.spoon ~/.hammerspoon/Spoons/
-cp ~/.claude-puppet/src/hook/claude-puppet-hook.sh ~/.claude-puppet/hook.sh
 ```
 
 Then:
@@ -116,6 +113,15 @@ Then:
 1. Run [step 4](#4-connect-claude-code) again: a new version may listen to more events.
 2. Click the Hammerspoon icon → **Reload Config**. The puppets come back where they were, with your menu choices.
 3. Start new Claude Code sessions.
+
+**Installed before version 0.9.0?** Back then the Spoon was copied and the hook lived in `~/.claude-puppet/hook.sh`. After the `git pull`, switch to the linked layout once, then do the three steps above:
+
+```sh
+rm -rf ~/.hammerspoon/Spoons/ClaudePuppet.spoon ~/.claude-puppet/hook.sh
+ln -sfn ~/.claude-puppet/src/ClaudePuppet.spoon ~/.hammerspoon/Spoons/ClaudePuppet.spoon
+```
+
+Step 4 then swaps the old hook for the new one in your Claude Code settings.
 
 ## Uninstall
 
@@ -128,14 +134,14 @@ defaults delete org.hammerspoon.Hammerspoon ClaudePuppet.choice 2>/dev/null
 defaults delete org.hammerspoon.Hammerspoon ClaudePuppet.position 2>/dev/null
 ```
 
-This removes the puppet's hooks from your Claude Code settings (keeping a backup), its files, and the menu choices and position Hammerspoon kept for it. Then delete the two `ClaudePuppet` lines from `~/.hammerspoon/init.lua` and click **Reload Config**.
+This removes the puppet's hooks from your Claude Code settings (keeping a backup), its files and the link in `~/.hammerspoon/Spoons`, and the menu choices and position Hammerspoon kept for it. Then delete the two `ClaudePuppet` lines from `~/.hammerspoon/init.lua` and click **Reload Config**.
 
 Hammerspoon itself stays: `brew uninstall --cask hammerspoon` removes it, and you can turn its Accessibility and Automation switches off in System Settings.
 
 ## If something does not work
 
 - **No puppet at all:** click the Hammerspoon icon → **Console**. A red line names the problem; a common one is a typo in `~/.hammerspoon/init.lua`.
-- **The puppet does not move while Claude works:** run `tail -f ~/.claude-puppet/events`. A line per event means the hook runs and the problem is on the Hammerspoon side (see Console). No lines: start a new Claude Code session, and check that `/hooks` in Claude Code lists `~/.claude-puppet/hook.sh`.
+- **The puppet does not move while Claude works:** run `tail -f ~/.claude-puppet/events`. A line per event means the hook runs and the problem is on the Hammerspoon side (see Console). No lines: start a new Claude Code session, and check that `/hooks` in Claude Code lists `~/.claude-puppet/src/harnesses/claude/translate.sh`.
 - **Cannot drag or click it:** Accessibility, step 5.2, including the remove-and-add-again fix.
 - **No tab number, or a click does not reach the right tab:** in iTerm2, check the Automation switch (step 5.3). Inside tmux or Zellij the puppet cannot see iTerm's tab, so it falls back to the next rule.
 - **A click does not reach the right window:** outside iTerm2 the puppet knows Terminal, Ghostty, WezTerm, Warp, VS Code, Hyper, Tabby and Zed. It brings the app forward and picks the window whose title has the project folder's name; in other terminals a click does nothing.

@@ -1,0 +1,8 @@
+{
+  "session_id": "s1",
+  "cwd": "/Users/dev/workspace/my-app",
+  "transcript_path": "/tmp/t.jsonl",
+  "hook_event_name": "SubagentStart",
+  "agent_id": "a1",
+  "agent_type": "code-reviewer"
+}

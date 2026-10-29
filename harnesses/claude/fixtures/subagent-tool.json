@@ -1,0 +1,12 @@
+{
+  "session_id": "s1",
+  "cwd": "/Users/dev/workspace/my-app",
+  "transcript_path": "/tmp/t.jsonl",
+  "hook_event_name": "PreToolUse",
+  "agent_id": "a1",
+  "agent_type": "general-purpose",
+  "tool_name": "Read",
+  "tool_input": {
+    "file_path": "/a"
+  }
+}
