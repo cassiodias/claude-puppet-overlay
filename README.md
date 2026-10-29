@@ -21,6 +21,10 @@ Claude puppets that float over your Mac desktop, like the old Office paperclip, 
 | ![The puppet codes at its laptop and shoots an invader with every tool call](docs/images/coding.png) | **Coding.** It types on its laptop and shoots an invader on its monitor with every tool call. The tag says which command it runs and in which tab. |
 | ![The same desk with green Matrix rain on the monitor](docs/images/planning.png) | **Matrix.** The same desk with green code rain, which pours faster with each tool call. |
 | ![Two puppets playing ping pong, one per subagent](docs/images/ping-pong.png) | **Ping pong.** One puppet per subagent, each scoring its own tool calls. |
+| ![Left, a puppet smiling at you; right, a puppet thinking with a thought bubble](docs/images/coding-smiling-thinking.png) | **Thinking and smiling.** Right: reading your prompt, with a thought bubble. Left: now and then a working puppet turns to smile at you. |
+| ![Two puppets looking at you and smiling](docs/images/dev-planner-happy.png) | **Happy.** The smile, on two puppets at once. |
+| ![A coder puppet and a Matrix puppet starting to think](docs/images/coding-planning.png) | **Coder and Matrix side by side.** One tab codes while the other has just been given a prompt. |
+| ![A bubble saying Claude is waiting for your input above a dozing puppet](docs/images/coding-waiting.png) | **Waiting for you.** Claude's own notifications show in the bubble of the session they come from. |
 | ![The puppet holds up a Bash? sign and asks May I use Bash?](docs/images/bash-may-I-use-bash.png) | **Waiting for a permission.** It holds up the tool's name and asks. |
 | ![A bubble with the first sentence of Claude's answer](docs/images/response-coder.png) | **Done.** The bubble says the first sentence of Claude's answer. |
 | ![Three puppets side by side: Matrix, ping pong and coding](docs/images/planner-reviewer-ping-pong-coding.png) | **Several sessions.** One puppet per busy session, each in its own colour and scene. |
