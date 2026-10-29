@@ -11,7 +11,7 @@ local obj = {}
 obj.__index = obj
 
 obj.name = "ClaudePuppet"
-obj.version = "0.2.1"
+obj.version = "0.2.2"
 obj.author = "Cassio Dias"
 obj.license = "MIT - https://opensource.org/licenses/MIT"
 obj.homepage = "https://github.com/cassiodias/claude-puppet-overlay"
@@ -329,15 +329,33 @@ function obj:render()
   self.canvas:replaceElements(elements)
 end
 
+local BUBBLE_HEIGHT, BUBBLE_GAP, SCREEN_MARGIN = 34, 6, 8
+
+-- Places the bubble above the puppet, right edges lined up, kept inside the screen the puppet is on
+-- (below the puppet when there is no room above).
+function obj:bubbleFrame(width)
+  local top, puppetWidth, puppetHeight = self.canvas:topLeft(), W * self.pixel, H * self.pixel
+  local center = { x = top.x + puppetWidth / 2, y = top.y + puppetHeight / 2 }
+  local screen = hs.screen.mainScreen():frame()
+  for _, each in ipairs(hs.screen.allScreens()) do
+    local f = each:frame()
+    if center.x >= f.x and center.x < f.x + f.w and center.y >= f.y and center.y < f.y + f.h then screen = f end
+  end
+  local x = top.x + puppetWidth - width
+  x = math.max(screen.x + SCREEN_MARGIN, math.min(x, screen.x + screen.w - width - SCREEN_MARGIN))
+  local y = top.y - BUBBLE_HEIGHT - BUBBLE_GAP
+  if y < screen.y + SCREEN_MARGIN then y = top.y + puppetHeight + BUBBLE_GAP end
+  return { x = x, y = y, w = width, h = BUBBLE_HEIGHT }
+end
+
 --- ClaudePuppet:say(text, seconds)
 --- Method
 --- Shows a speech bubble above the puppet; it stays until the next event, or for `seconds` when given.
 function obj:say(text, seconds)
   if self.bubbleTimer then self.bubbleTimer:stop() self.bubbleTimer = nil end
   if not text or text == "" then self.bubble:hide() return end
-  local width = math.min(340, 7 * #text + 24)
-  local top = self.canvas:topLeft()
-  self.bubble:frame({ x = top.x, y = top.y - 40, w = width, h = 34 })
+  local width = math.min(340, 7 * (utf8.len(text) or #text) + 24)
+  self.bubble:frame(self:bubbleFrame(width))
   self.bubble:replaceElements({
     { type = "rectangle", action = "strokeAndFill", fillColor = { white = 1, alpha = 0.95 },
       strokeColor = COLORS.c, strokeWidth = 2, roundedRectRadii = { xRadius = 10, yRadius = 10 } },
@@ -453,7 +471,7 @@ end
 
 function obj:moveTo(point)
   self.canvas:topLeft(point)
-  if self.bubble:isShowing() then self.bubble:topLeft({ x = point.x, y = point.y - 40 }) end
+  if self.bubble:isShowing() then self.bubble:frame(self:bubbleFrame(self.bubble:frame().w)) end
 end
 
 -- Brings forward the terminal running the current session, and its window when the title names the folder.
