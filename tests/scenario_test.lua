@@ -50,8 +50,8 @@ end
 -- Writes down every puppet on stage: where it sits, its colour, its bubble and its drawing.
 local function snapshot(P, title)
   line("== " .. title)
-  for i, key in ipairs(P.keys) do
-    local puppet = P.stage[key]
+  for i, key in ipairs(P.stage.keys) do
+    local puppet = P.stage.puppets[key]
     local at = puppet.canvas:topLeft()
     local bubble = puppet.bubble:isShowing() and puppet.bubble.elements[2] and puppet.bubble.elements[2].text or "-"
     line(string.format("  puppet %d: %s at %d,%d colour %s bubble: %s", i, key, at.x, at.y, puppet.color, bubble))

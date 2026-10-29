@@ -1,0 +1,164 @@
+-- The state of every agent session, changed one event at a time. It knows nothing of Hammerspoon or of a
+-- particular agent: the session's harness says what its tools mean, and bubbles come back as intents
+-- ({ key, text, seconds }; no text hides the bubble) for the caller to show.
+
+local config = require("puppet.config")
+
+local Sessions = {}
+Sessions.__index = Sessions
+
+local QUESTION_TEXT, PLAN_TEXT = "I have a question for you", "Plan ready for you"
+
+function Sessions.new(now)
+  return setmetatable({ all = {}, joined = 0, lastEventAt = now }, Sessions)
+end
+
+local function liveAgents(s)
+  local live = 0
+  for _, id in ipairs(s.order) do
+    if not s.agents[id].done then live = live + 1 end
+  end
+  return live
+end
+
+-- A session playing now gets a puppet, which it keeps until it leaves the stage.
+local function markPlayed(s)
+  if s.isListed and (s.isWorking or s.mood ~= nil or liveAgents(s) > 0) then s.hasPlayed = true end
+end
+
+-- The scene for a session now: its command's animation while it works, its desk at rest otherwise.
+function Sessions.sceneFor(s, mapping)
+  local live = liveAgents(s)
+  if not s.isListed then return "rest" end
+  if s.mood == "asking" or s.mood == "permission" then return "code" end
+  if not (s.isWorking or live > 0) then return "rest" end
+  local choice = mapping:choiceFor(s.command)
+  if choice == "pingpong" or (choice == "auto" and #s.order >= 2 and live > 0) then return "pingpong" end
+  return "code"
+end
+
+-- The sessions with a puppet, oldest first: one that has played keeps it until it ends, its terminal tab
+-- closes, or it has been silent for hours. With none, the home puppet.
+function Sessions:stageKeys(now)
+  local keys = {}
+  for sid, s in pairs(self.all) do
+    if s.hasPlayed and not s.isClosed and now - s.seenAt < config.STALE_SECONDS then keys[#keys + 1] = sid end
+  end
+  table.sort(keys, function(a, b) return self.all[a].joinedAt < self.all[b].joinedAt end)
+  if #keys == 0 then keys = { "home" } end
+  return keys
+end
+
+-- After the mapping changed: each session plays if its current turn's command now does.
+function Sessions:remap(mapping)
+  for _, s in pairs(self.all) do
+    s.isListed = mapping:choiceFor(s.command) ~= "off"
+    markPlayed(s)
+  end
+end
+
+-- A session whose terminal tab was there and is gone was closed without saying so.
+function Sessions:closeMissing(tabs)
+  for _, s in pairs(self.all) do
+    if s.tty and tabs[s.tty] then s.wasInTab = true end
+    if s.tty and s.wasInTab and not tabs[s.tty] then s.isClosed = true end
+  end
+end
+
+-- Ends the turn's show once the main thread and every subagent are done, saying what the agent did.
+local function finish(intents, sid, s)
+  if s.isListed and not s.isWorking and liveAgents(s) == 0 then
+    intents[#intents + 1] = { key = sid, text = (s.summary ~= "" and s.summary or "Done") .. " ✓",
+      seconds = config.DONE_SECONDS }
+  end
+end
+
+-- Applies one event. ctx: mapping, harness (the event's), frame, replayFrom (skip older events).
+function Sessions:apply(e, ctx)
+  local intents = {}
+  local sid, harness, mapping = e.session, ctx.harness, ctx.mapping
+  local at = e.at or ctx.now
+  if ctx.replayFrom and at < ctx.replayFrom then return intents end
+  if e.name == "SessionEnd" then
+    self.all[sid] = nil
+    return intents
+  end
+  local s = self.all[sid]
+  if not s then
+    self.joined = self.joined + 1
+    s = {
+      agents = {}, order = {}, score = 0, isWorking = false, readingUntil = 0, summary = "", tappedAt = -100,
+      joinedAt = self.joined, folder = "", tag = "",
+      -- A session first seen mid-turn has no prompt to judge by: it plays as the main conversation would.
+      isListed = mapping.conversation ~= "off",
+    }
+    self.all[sid] = s
+  end
+  self.lastEventAt = at
+  s.seenAt = at
+  s.harness = harness.id
+  if e.folder ~= "" then s.folder = e.folder end
+  if e.app ~= "" then s.app = e.app end
+  if e.tty:match("^/dev/ttys%d+$") then s.tty = e.tty end
+  if s.tag == "" then s.tag = s.folder end
+  local kind = harness.toolKind(e.tool)
+  local function say(text, seconds) intents[#intents + 1] = { key = sid, text = text, seconds = seconds } end
+
+  if e.name == "UserPromptSubmit" then
+    s.agents, s.order, s.score, s.isWorking, s.test, s.summary = {}, {}, 0, true, nil, ""
+    s.command = e.text:match("^/(%S+)")
+    s.isListed = mapping:choiceFor(s.command) ~= "off"
+    s.tag = e.text ~= "" and e.text:gsub("^/", "") or s.folder
+    s.mood = "thinking"
+    say(nil)
+  elseif e.name == "PreToolUse" then
+    if e.agentId ~= "" and s.agents[e.agentId] then s.agents[e.agentId].hits = s.agents[e.agentId].hits + 1 end
+    -- The agent calling a listed skill starts the show mid-turn, as typing its /command does.
+    if kind == "skill" and mapping:mappedScene(e.text) then
+      s.isListed, s.tag, s.command = true, e.text, e.text
+    end
+    if e.agentId == "" then
+      s.isWorking = true
+      s.mood = nil
+      if kind == "question" then s.mood, s.moodText = "asking", QUESTION_TEXT end
+      if kind == "plan" then s.mood, s.moodText = "asking", PLAN_TEXT end
+    end
+    if s.mood == "asking" and s.isListed then say(s.moodText) else say(nil) end
+    if kind == "reading" then
+      s.readingUntil = ctx.frame + 20
+    elseif e.flag == "test" then
+      s.test = { state = "running" }
+    else
+      s.score = s.score + 1
+      s.tappedAt = ctx.frame
+    end
+  elseif e.name == "PostToolUse" or e.name == "PostToolUseFailure" then
+    if e.flag == "test" and s.test then
+      s.test = { state = e.name == "PostToolUse" and "pass" or "fail", untilFrame = ctx.frame + 30 }
+    end
+    if s.mood == "permission" or s.mood == "asking" then
+      s.mood = nil
+      say(nil)
+    end
+  elseif e.name == "PermissionRequest" then
+    s.mood, s.moodText = "permission", (e.tool ~= "" and e.tool or "OK")
+    if s.isListed then say("May I use " .. s.moodText .. "?") end
+  elseif e.name == "SubagentStart" and e.agentId ~= "" then
+    s.agents[e.agentId] = { label = (e.agentType ~= "" and e.agentType or "agent"):sub(1, 18), hits = 0, done = false }
+    s.order[#s.order + 1] = e.agentId
+  elseif e.name == "SubagentStop" and s.agents[e.agentId] then
+    s.agents[e.agentId].done = true
+    finish(intents, sid, s)
+  elseif e.name == "Notification" then
+    local isShown = s.mood == "permission" or s.mood == "asking"
+    if s.isListed and not isShown then say(e.text ~= "" and e.text or (harness.name .. " needs you")) end
+  elseif e.name == "Stop" then
+    s.isWorking, s.mood, s.summary = false, nil, e.text
+    -- Background subagents may still be working; the last one to stop says it then.
+    finish(intents, sid, s)
+  end
+  markPlayed(s)
+  return intents
+end
+
+return Sessions

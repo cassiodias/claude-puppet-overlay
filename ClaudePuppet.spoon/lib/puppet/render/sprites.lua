@@ -1,0 +1,46 @@
+-- Every sprite, as rows of colour keys from config.COLORS ("." is transparent).
+
+return {
+  SIDE = {
+    "..ccccc..",
+    ".ccccccc.",
+    ".cccccck.",
+    ".cccccck.",
+    ".ccccccc.",
+    ".ccccccc.",
+    ".ccccccc.",
+    ".ccccccc.",
+    ".ccccccc.",
+  },
+  SMILE = {
+    "..ccccc..",
+    ".ccccccc.",
+    ".ckccckc.",
+    ".ckccckc.",
+    ".ccccccc.",
+    ".kccccck.",
+    ".ckkkkkc.",
+    ".ccccccc.",
+    ".ccccccc.",
+  },
+  FRONT = {
+    ".ccccccc.",
+    ".ckcccck.",
+    "ccccccccc",
+    ".ccccccc.",
+    ".c.c.c.c.",
+  },
+  FRONT_ASLEEP = {
+    ".ccccccc.",
+    ".cccccccc",
+    "ccccccccc",
+    ".ccccccc.",
+    ".c.c.c.c.",
+  },
+  INVADER = { { ".vvv.", "v.v.v", "v...v" }, { ".vvv.", "v.v.v", ".v.v." } },
+  SHIP = { "..c..", "ccccc" },
+  BOOM = { "y.y.y", ".y.y.", "y.y.y" },
+  CHECK = { "......p", ".....p.", "p...p..", ".p.p...", "..p...." },
+  CROSS = { "r...r", ".r.r.", "..r..", ".r.r.", "r...r" },
+  LENS = { ".www..", "w...w.", "w...w.", ".www..", "....g.", ".....g" },
+}
