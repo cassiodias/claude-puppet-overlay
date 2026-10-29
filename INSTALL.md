@@ -49,9 +49,10 @@ macOS asks you for these, and no script can click them for you:
 
 1. **Open Hammerspoon:** `open -a Hammerspoon`. On the first launch it shows a setup window.
 2. **Allow Accessibility:** System Settings → Privacy & Security → **Accessibility** → turn on **Hammerspoon**. Without it you cannot drag the puppet or click it to jump to your terminal.
-3. **Launch at login:** click the Hammerspoon icon in the menu bar → **Preferences** → tick **Launch Hammerspoon at login**. Otherwise the puppet is gone after a restart.
-4. **Reload:** click the Hammerspoon icon → **Reload Config**. A puppet appears in the bottom right corner of your main screen, with a `▟▙` icon in the menu bar to hide the puppets or move them back to the corner. More puppets line up to its left while several Claude sessions are busy.
-5. **Start a new Claude Code session.** Sessions that were already open do not pick up the new hooks.
+3. **Allow iTerm2 control** (iTerm2 users): the first time Hammerspoon looks up your tabs, macOS asks *"Hammerspoon wants to control iTerm2"*. Click **OK**. It is how the puppets know each session's tab number and select that tab on a click. If you clicked Don't Allow, turn it on in System Settings → Privacy & Security → **Automation** → Hammerspoon → iTerm2.
+4. **Launch at login:** click the Hammerspoon icon in the menu bar → **Preferences** → tick **Launch Hammerspoon at login**. Otherwise the puppet is gone after a restart.
+5. **Reload:** click the Hammerspoon icon → **Reload Config**. A puppet appears in the bottom right corner of your main screen, with a `▟▙` icon in the menu bar to hide the puppets or move them back to the corner. More puppets line up to its left while several Claude sessions are busy.
+6. **Start a new Claude Code session.** Sessions that were already open do not pick up the new hooks.
 
 ## 6. Try it
 
@@ -96,4 +97,5 @@ Then delete the `ClaudePuppet` lines from `~/.hammerspoon/init.lua` and **Reload
 
 - **The puppet does not move:** run `tail -f ~/.claude-puppet/events` while Claude works. A line per event means the hook runs and the problem is on the Hammerspoon side: open **Console** from its menu bar icon to see errors. No lines: start a new Claude Code session, and check that `/hooks` in Claude Code lists `~/.claude-puppet/hook.sh`.
 - **Cannot drag or click it:** Accessibility is off for Hammerspoon (step 5.2). After turning it on, quit and reopen Hammerspoon.
-- **A click does not reach the right window:** the puppet knows iTerm2, Terminal, Ghostty, WezTerm, Warp, VS Code, Hyper, Tabby and Zed. It brings the app forward and picks the window whose title has the project folder's name; in other terminals a click does nothing.
+- **No tab number, or a click does not reach the right tab:** in iTerm2, check the Automation switch (step 5.3). Inside tmux or Zellij the puppet cannot see iTerm's tab, so it falls back to the next rule.
+- **A click does not reach the right window:** outside iTerm2 the puppet knows Terminal, Ghostty, WezTerm, Warp, VS Code, Hyper, Tabby and Zed. It brings the app forward and picks the window whose title has the project folder's name; in other terminals a click does nothing.

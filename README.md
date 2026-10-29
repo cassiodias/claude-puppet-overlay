@@ -15,7 +15,7 @@ Claude puppets that float over your Mac desktop, like the old Office paperclip, 
 | idle | waits at its desk, and dozes off after a while |
 
 - **One puppet per session:** with one tab coding and another reviewing, two puppets sit side by side, each in its own colour, with a name tag (the `/command` you ran, or the project folder), its own scene and its own bubble. A session quiet for 3 minutes walks off; with nothing busy, one puppet waits at home.
-- **Click a puppet** (or its bubble) to jump to the terminal running that session.
+- **Click a puppet** (or its bubble) to jump to the terminal running that session. In iTerm2 it selects the exact window and tab, and the tab number is written under the puppet's table (`tab 3`, or `window 2 · tab 3` with several windows).
 - **Drag any puppet** to move the whole row; it stays on top of every app and every desktop.
 
 It is two small pieces: a Claude Code hook that writes one line per event to `~/.claude-puppet/events`, and a [Hammerspoon](https://www.hammerspoon.org) Spoon that reads them and draws the puppet. Nothing leaves your machine. From your prompts it keeps only a leading `/command`; from Claude's answers, only the first sentence; never commands or code.

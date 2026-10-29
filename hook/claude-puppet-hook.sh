@@ -1,6 +1,6 @@
 #!/bin/sh
 # Claude Code runs this on each hook event: it appends one short line for the floating puppet to read.
-# Line: time|event|session|agent|tool|agent type|text|folder|terminal app|flag
+# Line: time|event|session|agent|tool|agent type|text|folder|terminal app|flag|tty
 # Kept: a prompt's leading /command, a skill Claude calls, a notification, the first sentence of Claude's reply;
 # never commands or code.
 
@@ -41,9 +41,28 @@ if [ "$tool" = "Bash" ]; then
   esac
 fi
 cwd=$(field cwd)
+session=$(field session_id)
 
-printf '%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n' "$(date +%s)" "$event" "$(field session_id)" "$(field agent_id)" \
-  "$tool" "$(field agent_type)" "$text" "${cwd##*/}" "${TERM_PROGRAM:-}" "$flag" >> "$file"
+# The terminal the session runs in: the first ancestor process that has one, remembered per session.
+tty_file="$dir/tty-$session"
+if [ -n "$session" ] && [ -f "$tty_file" ]; then
+  tty=$(cat "$tty_file")
+else
+  tty=""
+  pid=$$
+  while [ -n "$pid" ] && [ "$pid" -gt 1 ]; do
+    name=$(ps -o tty= -p "$pid" | tr -d ' ')
+    case "$name" in
+      ""|"??") pid=$(ps -o ppid= -p "$pid" | tr -d ' ') ;;
+      *) tty="/dev/$name"; break ;;
+    esac
+  done
+  [ -n "$session" ] && printf '%s' "$tty" > "$tty_file"
+fi
+[ "$event" = "SessionEnd" ] && rm -f "$tty_file"
+
+printf '%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\n' "$(date +%s)" "$event" "$session" "$(field agent_id)" \
+  "$tool" "$(field agent_type)" "$text" "${cwd##*/}" "${TERM_PROGRAM:-}" "$flag" "$tty" >> "$file"
 
 # Keep the file small; the puppet starts reading again from the top.
 [ "$(wc -c < "$file")" -gt 1000000 ] && : > "$file"

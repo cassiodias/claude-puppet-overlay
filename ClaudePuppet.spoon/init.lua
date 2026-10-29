@@ -11,7 +11,7 @@ local obj = {}
 obj.__index = obj
 
 obj.name = "ClaudePuppet"
-obj.version = "0.3.0"
+obj.version = "0.4.1"
 obj.author = "Cassio Dias"
 obj.license = "MIT - https://opensource.org/licenses/MIT"
 obj.homepage = "https://github.com/cassiodias/claude-puppet-overlay"
@@ -69,6 +69,9 @@ local TERMINALS = {
   Tabby = "org.tabby",
   zed = "dev.zed.Zed",
 }
+
+local ITERM = "com.googlecode.iterm2"
+local TABS_SECONDS = 3
 
 local READING_TOOLS = { Read = true, Grep = true, Glob = true, LSP = true, WebFetch = true, WebSearch = true }
 
@@ -174,10 +177,17 @@ local function toElements(buf, px, colors)
   return elements
 end
 
+-- Text on the puppet: white with a black outline, readable on dark and light desktops alike; dark on the sign.
 local function label(text, x, y, w, align, px, isDark)
+  local style = {
+    font = { name = "Menlo-Bold", size = 2.5 * px },
+    color = { white = isDark and 0.1 or 1 },
+    paragraphStyle = { alignment = align },
+  }
+  if not isDark then style.strokeColor, style.strokeWidth = { white = 0 }, -5 end
   return {
-    type = "text", text = text, textColor = { white = isDark and 0.1 or 1 }, textSize = 2.5 * px,
-    textAlignment = align, withShadow = not isDark, frame = { x = x * px, y = y * px, w = w * px, h = 4 * px },
+    type = "text", text = hs.styledtext.new(text, style),
+    frame = { x = x * px, y = y * px, w = w * px, h = 4 * px },
   }
 end
 
@@ -427,7 +437,11 @@ function obj:render()
     if scene == "pingpong" then self:drawPingPong(buf, texts, s)
     elseif scene == "code" then self:drawCode(buf, texts, s)
     else self:drawIdle(buf, texts, s) end
-    if s then texts[#texts + 1] = label(s.tag, 0, 20.5, W, "center", self.pixel) end
+    if s then
+      texts[#texts + 1] = label(s.tag, 0, 18.6, W, "center", self.pixel)
+      local tab = self:tabLabel(s)
+      if tab then texts[#texts + 1] = label(tab, 0, 21.2, W, "center", self.pixel) end
+    end
     local elements = toElements(buf, self.pixel, puppet.colors)
     for _, text in ipairs(texts) do elements[#elements + 1] = text end
     puppet.canvas:replaceElements(elements)
@@ -474,8 +488,8 @@ end
 -- Applies one hook event line to its session.
 function obj:handle(line)
   local f = split(line)
-  local event, sid, aid, tool, atype, text, folder, app, flag =
-    f[2], f[3] or "", f[4] or "", f[5] or "", f[6] or "", f[7] or "", f[8] or "", f[9] or "", f[10] or ""
+  local event, sid, aid, tool, atype, text, folder, app, flag, tty =
+    f[2], f[3] or "", f[4] or "", f[5] or "", f[6] or "", f[7] or "", f[8] or "", f[9] or "", f[10] or "", f[11] or ""
   if not event or sid == "" then return end
   if event == "SessionEnd" then
     self.sessions[sid] = nil
@@ -496,6 +510,7 @@ function obj:handle(line)
   s.seenAt = os.time()
   if folder ~= "" then s.folder = folder end
   if app ~= "" then s.app = app end
+  if tty:match("^/dev/ttys%d+$") then s.tty = tty end
   if s.tag == "" then s.tag = s.folder end
 
   if event == "UserPromptSubmit" then
@@ -567,9 +582,68 @@ function obj:readEvents()
   for line in complete:gmatch("([^\n]*)\n") do self:handle(line) end
 end
 
--- Brings forward the terminal running a session, and its window when the title names the folder.
+-- Asks iTerm which window and tab holds each terminal device; only while iTerm runs, so it is never launched.
+function obj:refreshTabs()
+  self.tabs, self.iTermWindows = {}, 0
+  if not hs.application.get(ITERM) then return end
+  local ok, result = hs.osascript.applescript([[
+    set out to ""
+    tell application id "com.googlecode.iterm2"
+      set wi to 0
+      repeat with w in windows
+        set wi to wi + 1
+        set ti to 0
+        repeat with t in tabs of w
+          set ti to ti + 1
+          repeat with s in sessions of t
+            set out to out & (tty of s) & "=" & wi & "/" & ti & ";"
+          end repeat
+        end repeat
+      end repeat
+    end tell
+    return out]])
+  if not ok or type(result) ~= "string" then return end
+  for tty, window, tab in result:gmatch("([^=;]+)=(%d+)/(%d+);") do
+    self.tabs[tty] = { window = tonumber(window), tab = tonumber(tab) }
+    self.iTermWindows = math.max(self.iTermWindows, tonumber(window))
+  end
+end
+
+-- The iTerm tab a session runs in, as shown under its table; the window too when iTerm has several.
+function obj:tabLabel(s)
+  local place = s.tty and self.tabs[s.tty]
+  if not place then return nil end
+  if self.iTermWindows > 1 then return "window " .. place.window .. " · tab " .. place.tab end
+  return "tab " .. place.tab
+end
+
+-- Selects the iTerm window, tab and pane running a terminal device; false when iTerm has none.
+local function selectITermSession(tty)
+  local ok, found = hs.osascript.applescript(string.format([[
+    tell application id "com.googlecode.iterm2"
+      repeat with w in windows
+        repeat with t in tabs of w
+          repeat with s in sessions of t
+            if tty of s is "%s" then
+              select w
+              select t
+              select s
+              activate
+              return true
+            end if
+          end repeat
+        end repeat
+      end repeat
+    end tell
+    return false]], tty))
+  return ok and found == true
+end
+
+-- Brings forward the terminal running a session: its exact iTerm tab when known, otherwise the app
+-- and the window whose title names the folder.
 function obj:focus(key)
   local s = self.sessions[key]
+  if s and s.app == "iTerm.app" and s.tty and selectITermSession(s.tty) then return end
   local bundle = s and TERMINALS[s.app or ""]
   if not bundle then return end
   hs.application.launchOrFocusByBundleID(bundle)
@@ -626,7 +700,7 @@ end
 function obj:start()
   self.anchor = hs.settings.get(POSITION_KEY) or self:defaultPosition()
   self.frame, self.lastEventAt, self.joined, self.isShown = 0, os.time(), 0, true
-  self.sessions, self.stage, self.keys = {}, {}, {}
+  self.sessions, self.stage, self.keys, self.tabs, self.iTermWindows = {}, {}, {}, {}, 0
   self.offset = hs.fs.attributes(self.eventsFile, "size") or 0
 
   self.menu = hs.menubar.new()
@@ -646,6 +720,8 @@ function obj:start()
     self:readEvents()
     self:render()
   end)
+  self.tabsTimer = hs.timer.doEvery(TABS_SECONDS, function() self:refreshTabs() end)
+  self:refreshTabs()
   self:render()
   return self
 end
@@ -655,10 +731,11 @@ end
 --- Hides the puppets and stops following events.
 function obj:stop()
   if self.timer then self.timer:stop() end
+  if self.tabsTimer then self.tabsTimer:stop() end
   if self.dragTap then self.dragTap:stop() end
   if self.menu then self.menu:delete() end
   for key in pairs(self.stage or {}) do self:removePuppet(key) end
-  self.timer, self.dragTap, self.menu = nil, nil, nil
+  self.timer, self.tabsTimer, self.dragTap, self.menu = nil, nil, nil, nil
   return self
 end
 
