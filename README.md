@@ -8,7 +8,7 @@ Claude puppets that float over your Mac desktop, like the old Office paperclip, 
 | working | types on its laptop and shoots an invader on its monitor with every tool call, or watches green Matrix rain pour faster with each one; now and then it turns to smile at you |
 | reading or searching files | moves a magnifying glass over the monitor |
 | running tests | shows a progress bar, then a green ✓ or a red ✗ |
-| running subagents | plays ping pong: two puppets, one per subagent, each scoring its own tool calls |
+| running subagents | plays ping pong: two puppets, one per subagent, each named after its task and scoring its own tool calls |
 | asking you something or showing a plan | raises its hand: "I have a question for you", "Plan ready for you" |
 | waiting for a permission | holds up a sign with the tool's name: "May I use Bash?" |
 | done | says the first sentence of Claude's answer, like "Fixed the parser and added two tests. ✓" |
@@ -34,7 +34,7 @@ Claude puppets that float over your Mac desktop, like the old Office paperclip, 
 
 - **One puppet per session:** with one tab coding and another reviewing, two puppets sit side by side, each in its own colour, with a name tag (the command you ran, or the project folder), its own scene and its own bubble. Between turns a puppet rests at its desk with the monitor off, and dozes; it leaves when its session ends or its iTerm tab closes. With no session on stage, one puppet waits at home.
 - **Choose what plays** from the `▟▙` menu bar icon (or Option-click a puppet): list `my-coding-skill` under Coder, `my-planner` under Matrix and `my-reviewer` under Ping pong, and set the main conversation to Coder, Matrix, auto or Off. Each tab's puppet follows the command that tab runs.
-- **See where each one is:** under the name tag, a short line gives the project folder and how long the puppet has been at it (`my-app · 32m`, `idle 12m`, `waiting 3m`). Rest the mouse on a puppet for a card with the rest: its folder and tab, the command and what it is doing, its subagents (working and done), its tool calls and the last tool, and the first sentence of its last reply.
+- **See where each one is:** under the name tag, a short line gives the project folder and how long the puppet has been at it (`my-app · 32m`, `idle 12m`, `waiting 3m`). Rest the mouse on a puppet for a card with the rest: the session's title (as Claude Code names it), its folder and tab, the command and what it is doing, its subagents (by their task while working, and how many are done), its tool calls and the last tool, and the first sentence of its last reply.
 - **Click a puppet** (or its bubble) to jump to the terminal running that session. In iTerm2 it selects the exact window and tab, and the tab number is written under the puppet's table (`tab 3`, or `window 2 · tab 3` with several windows).
 - **Drag any puppet** to move the whole row, across screens too; it stays on top of every app and every desktop. The `▟▙` menu bar icon sends the row to the corner of any screen, and puppets left on a screen you unplug come back to the main one.
 

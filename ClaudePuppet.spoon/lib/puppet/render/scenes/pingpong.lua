@@ -27,8 +27,9 @@ return {
     local y = 15 - math.floor(7 * math.sin(math.pi * x / span) + 0.5)
     fill(buf, 11 + x, y, 11 + x, y, "w")
 
-    texts[#texts + 1] = label(left.label .. " " .. left.hits .. (left.done and " ✓" or ""), 0, 2, 22, "left", px)
-    texts[#texts + 1] = label(right.label .. " " .. right.hits .. (right.done and " ✓" or ""), W - 22, 2, 22,
-      "right", px)
+    -- The score first, so a long name is the part that gets cut.
+    local function seat(agent) return (agent.done and "✓ " or "") .. agent.hits .. " " .. agent.label end
+    texts[#texts + 1] = label(seat(left), 0, 2, 22, "left", px)
+    texts[#texts + 1] = label(seat(right), W - 22, 2, 22, "right", px)
   end,
 }

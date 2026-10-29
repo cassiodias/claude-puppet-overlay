@@ -9,13 +9,15 @@ local Mapping = require("puppet.model.mapping")
 
 local fake = {
   id = "fake", name = "Fakebot",
-  toolKind = function(tool) return ({ look = "reading", ask_human = "question", run_skill = "skill" })[tool] end,
+  toolKind = function(tool)
+    return ({ look = "reading", ask_human = "question", run_skill = "skill", spawn = "agent" })[tool]
+  end,
 }
 local mapping = Mapping.new({ coder = { "build" }, pingpong = { "review" }, conversation = "off" })
 
 local function event(name, fields)
   local e = { at = 100, name = name, session = "s1", agentId = "", tool = "", agentType = "", text = "",
-    folder = "repo", app = "", flag = "", tty = "", harness = "fake" }
+    folder = "repo", app = "", flag = "", tty = "", harness = "fake", title = "" }
   for k, v in pairs(fields or {}) do e[k] = v end
   return e
 end
@@ -86,5 +88,28 @@ check("a message during the turn keeps its start", timed.all.s1.turnAt == 100 an
 at(140, "Stop", {})
 at(200, "UserPromptSubmit", { text = "/build" })
 check("a new turn starts the clock and the count again", timed.all.s1.turnAt == 200 and timed.all.s1.tools == 0)
+
+
+-- The session's title, and what each subagent is for.
+local named = Sessions.new(100)
+local function said(name, fields)
+  return named:apply(event(name, fields), { mapping = mapping, harness = fake, frame = 1, now = 100 })
+end
+said("UserPromptSubmit", { text = "/review", title = "PR 12 review" })
+check("the title is kept", named.all.s1.title == "PR 12 review")
+said("PreToolUse", { tool = "spawn", text = "QA lens contract T-42" })
+said("PreToolUse", { tool = "spawn", text = "QA lens break T-42" })
+said("SubagentStart", { agentId = "a1", agentType = "general-purpose" })
+said("SubagentStart", { agentId = "a2", agentType = "general-purpose", text = "Break it, from the meta file" })
+check("a subagent without its own description takes the first one called", named.all.s1.agents.a1.label == "QA lens contract T-42")
+check("a description sent with the start wins", named.all.s1.agents.a2.label == "Break it, from the meta file")
+said("SubagentStart", { agentId = "a3", agentType = "general-purpose" })
+check("with nothing queued, the agent type", named.all.s1.agents.a3.label == "general-purpose")
+said("Stop", { title = "" })
+check("an event without a title keeps the last one", named.all.s1.title == "PR 12 review")
+said("PreToolUse", { tool = "spawn", text = "left over" })
+said("UserPromptSubmit", { text = "/build" })
+said("SubagentStart", { agentId = "a4", agentType = "lens" })
+check("a new turn forgets descriptions queued in the last one", named.all.s1.agents.a4.label == "lens")
 
 check.done("sessions")

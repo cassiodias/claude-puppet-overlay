@@ -85,5 +85,6 @@ Missing events are fine: an agent without permission events simply never shows t
 
 - Keep each change focused, with tests passing (`tests/run.sh`).
 - No logos or brand mascots in the drawings.
-- Do not log prompts, commands or code: translators keep only a leading `/command`, a skill name, a notification
-  and the first sentence of a reply.
+- Do not log prompts, commands or code: translators keep only a leading `/command`, a skill name, a notification,
+  the first sentence of a reply, and the short names the agent gives its work (the session's title, a
+  subagent's description).

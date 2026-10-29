@@ -6,7 +6,7 @@ local check = dofile(root .. "/tests/support/check.lua")
 local harnesses = require("puppet.harnesses")
 
 local CAPABILITIES = { "prompt", "tools", "toolFailure", "subagents", "permission", "question", "reply", "sessionEnd" }
-local KINDS = { reading = true, question = true, plan = true, skill = true }
+local KINDS = { reading = true, question = true, plan = true, skill = true, agent = true }
 
 for id, h in pairs(harnesses.all) do
   check(id .. ": id matches its registry key", h.id == id)

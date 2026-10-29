@@ -1,5 +1,5 @@
 -- One line of the events file into an event. The line format lives here and in hook/puppet-lib.sh only:
--- time|event|session|agent id|tool|agent type|text|folder|terminal app|flag|tty|harness
+-- time|event|session|agent id|tool|agent type|text|folder|terminal app|flag|tty|harness|title
 -- A line without the 12th field was written before harnesses existed, so it is Claude Code's.
 
 local parse = {}
@@ -21,6 +21,7 @@ function parse.line(line)
     flag = f[10] or "",
     tty = f[11] or "",
     harness = (f[12] and f[12] ~= "") and f[12] or "claude",
+    title = f[13] or "",
   }
 end
 

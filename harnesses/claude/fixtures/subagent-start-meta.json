@@ -1,0 +1,8 @@
+{
+  "session_id": "s2",
+  "cwd": "/Users/dev/workspace/my-app",
+  "transcript_path": "harnesses/claude/fixtures/transcript/s2.jsonl",
+  "hook_event_name": "SubagentStart",
+  "agent_id": "a2",
+  "agent_type": "general-purpose"
+}

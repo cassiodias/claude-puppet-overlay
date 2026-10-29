@@ -123,8 +123,9 @@ snapshot(P, "tab1 has a question")
 
 stub.tabs, stub.itermRunning = "/dev/ttys001=1/1;/dev/ttys002=1/2;", true
 write("UserPromptSubmit|tab2||||/qa CON-1|app||iTerm.app||/dev/ttys002")
+write("PreToolUse|tab2||Agent||Check the contract|app|iTerm.app||/dev/ttys002|claude|Shop-api PR 12 review")
 write("SubagentStart|tab2|a1||contract||app|iTerm.app||/dev/ttys002")
-write("SubagentStart|tab2|a2||break||app|iTerm.app||/dev/ttys002")
+write("SubagentStart|tab2|a2||break|Try to break it|app|iTerm.app||/dev/ttys002")
 write("PreToolUse|tab2|a1|Read|||app|iTerm.app||/dev/ttys002")
 write("PreToolUse|tab2|a2|Bash|||app|iTerm.app||/dev/ttys002")
 stub.advance(3.1)

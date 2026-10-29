@@ -1,0 +1,5 @@
+{"type":"user","message":{"role":"user","content":"review the parser"}}
+{"type":"ai-title","aiTitle":"Parser first draft","sessionId":"s2"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"On it."}]}}
+{"type":"ai-title","aiTitle":"Parser review | edge cases","sessionId":"s2"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"Done."}]}}

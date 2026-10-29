@@ -67,13 +67,16 @@ payloads captured on a real run.
 ## The event line
 
 ```
-time|event|session|agent id|tool|agent type|text|folder|terminal app|flag|tty|harness
+time|event|session|agent id|tool|agent type|text|folder|terminal app|flag|tty|harness|title
 ```
 
-- `text` is a prompt's leading `/command`, a skill's name, a notification, or the first sentence of a reply.
-  Nothing else from prompts or replies, and never commands or code.
+- `text` is a prompt's leading `/command`, a skill's name, a notification, the first sentence of a reply, or a
+  subagent's short description (on the call that starts it, and on its start). Nothing else from prompts or
+  replies, and never commands or code.
 - `flag` is `test` when a shell command runs tests.
-- A line without the last field is read as `claude`.
+- `title` is the session's title as the agent named it (Claude Code keeps one in its transcript), sent at the
+  start and end of a turn.
+- A line without `harness` is read as `claude`; a line without `title` has none.
 
 The format lives in two places only: `hook/puppet-lib.sh` (writing) and `events/parse.lua` (reading). It stays a
 pipe-separated line because translators are shell scripts; JSON would need `jq` and escaping in each of them.

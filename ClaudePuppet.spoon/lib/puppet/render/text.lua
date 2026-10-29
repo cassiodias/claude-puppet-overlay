@@ -6,11 +6,12 @@ local W = config.W
 local text = {}
 
 -- White with a black outline, readable on dark and light desktops alike; dark on the permission sign.
+-- One line: a text too long for it ends in "…".
 function text.label(value, x, y, w, align, px, isDark)
   local style = {
     font = { name = "Menlo-Bold", size = 2.5 * px },
     color = { white = isDark and 0.1 or 1 },
-    paragraphStyle = { alignment = align },
+    paragraphStyle = { alignment = align, lineBreak = "truncateTail" },
   }
   if not isDark then style.strokeColor, style.strokeWidth = { white = 0 }, -3 end
   return {

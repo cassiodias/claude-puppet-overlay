@@ -8,15 +8,18 @@ puppet_read_payload
 event=$(field hook_event_name)
 tool=$(field tool_name)
 text=""
+title=""
 case "$event" in
-  UserPromptSubmit) text=$(leading_command "$(field prompt)") ;;
+  UserPromptSubmit) text=$(leading_command "$(field prompt)"); title=$(session_title "$(field transcript_path)") ;;
   Notification) text=$(field message) ;;
-  Stop) text=$(first_sentence last_assistant_message) ;;
+  Stop) text=$(first_sentence last_assistant_message); title=$(session_title "$(field transcript_path)") ;;
+  SubagentStart) text=$(subagent_description "$(field transcript_path)" "$(field agent_id)") ;;
 esac
 [ "$tool" = "Skill" ] && text=$(field tool_input.skill)
+case "$tool" in Agent|Task) text=$(field tool_input.description) ;; esac
 flag=""
 [ "$tool" = "Bash" ] && is_test_command "$(field tool_input.command)" && flag="test"
 
 write_event claude "$event" "$(field session_id)" "$(field agent_id)" "$tool" "$(field agent_type)" "$text" \
-  "$(field cwd)" "$flag"
+  "$(field cwd)" "$flag" "$title"
 exit 0

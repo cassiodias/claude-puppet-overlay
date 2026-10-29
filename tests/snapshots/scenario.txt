@@ -293,7 +293,7 @@
   |            g                      g            |
   |            g                      g            |
   |            g                      g            |
-  texts: contract 1 / break 1 / qa CON-1 · tab 2 / app · <1m
+  texts: 1 Check the contract / 1 Try to break it / qa CON-1 · tab 2 / app · <1m
 == tab3 watches the Matrix rain
   puppet 1: tab1 at 1208,752 colour #D97757 bubble: I have a question for you
   |                                                |
@@ -346,7 +346,7 @@
   |            g                      g            |
   |            g                      g            |
   |            g                      g            |
-  texts: contract 1 / break 1 / qa CON-1 · tab 2 / app · <1m
+  texts: 1 Check the contract / 1 Try to break it / qa CON-1 · tab 2 / app · <1m
   puppet 3: tab3 at 800,752 colour #A06CD5 bubble: -
   |                                                |
   |                 gggggggggggggggggggggggggggggg |
@@ -425,7 +425,7 @@
   |            g                      g            |
   |            g                      g            |
   |            g                      g            |
-  texts: contract 1 / break 1 / qa CON-1 · tab 2 / app · <1m
+  texts: 1 Check the contract / 1 Try to break it / qa CON-1 · tab 2 / app · <1m
   puppet 3: tab3 at 800,752 colour #A06CD5 bubble: -
   |                                                |
   |                 gggggggggggggggggggggggggggggg |
@@ -504,7 +504,7 @@
   |            g                      g            |
   |            g                      g            |
   |            g                      g            |
-  texts: contract 1 / break 1 / qa CON-1 · tab 2 / app · <1m
+  texts: 1 Check the contract / 1 Try to break it / qa CON-1 · tab 2 / app · <1m
   puppet 3: tab3 at 800,752 colour #A06CD5 bubble: -
   |                                                |
   |                 gggggggggggggggggggggggggggggg |
@@ -583,7 +583,7 @@
   |            g                      g            |
   |            g                      g            |
   |            g                      g            |
-  texts: contract 1 / break 1 / qa CON-1 · tab 2 / app · <1m
+  texts: 1 Check the contract / 1 Try to break it / qa CON-1 · tab 2 / app · <1m
   puppet 3: tab3 at 800,752 colour #A06CD5 bubble: -
   |                                                |
   |                 gggggggggggggggggggggggggggggg |
@@ -662,7 +662,7 @@
   |            g                      g            |
   |            g                      g            |
   |            g                      g            |
-  texts: contract 1 ✓ / break 1 / qa CON-1 · tab 2 / app · <1m
+  texts: ✓ 1 Check the contract / 1 Try to break it / qa CON-1 · tab 2 / app · <1m
   puppet 3: tab3 at 800,752 colour #A06CD5 bubble: -
   |                                                |
   |                 gggggggggggggggggggggggggggggg |
@@ -716,7 +716,7 @@
   |  bb                                        bb  |
   |  bb                                        bb  |
   texts: dev-skill CON-1 · tab 1 / app · idle <1m
-  puppet 2: tab2 at 1004,752 colour #5B8DEF bubble: app · tab 2 / /qa · working <1m / subagents: 1 working, 1 done / 2 tool calls · last: Bash
+  puppet 2: tab2 at 1004,752 colour #5B8DEF bubble: Shop-api PR 12 review / app · tab 2 / /qa · working <1m / subagents: Try to break it working, 1 done / 3 tool calls · last: Bash
   |                                                |
   |                                                |
   |                                                |
@@ -741,7 +741,7 @@
   |            g                      g            |
   |            g                      g            |
   |            g                      g            |
-  texts: contract 1 ✓ / break 1 / qa CON-1 · tab 2 / app · <1m
+  texts: ✓ 1 Check the contract / 1 Try to break it / qa CON-1 · tab 2 / app · <1m
   puppet 3: tab3 at 800,752 colour #A06CD5 bubble: -
   |                                                |
   |                 gggggggggggggggggggggggggggggg |
@@ -820,7 +820,7 @@
   |            g                      g            |
   |            g                      g            |
   |            g                      g            |
-  texts: contract 1 ✓ / break 1 / qa CON-1 · tab 2 / app · <1m
+  texts: ✓ 1 Check the contract / 1 Try to break it / qa CON-1 · tab 2 / app · <1m
   puppet 3: tab3 at 800,752 colour #A06CD5 bubble: -
   |                                                |
   |                 gggggggggggggggggggggggggggggg |
@@ -899,7 +899,7 @@
   |            g                      g            |
   |            g                      g            |
   |            g                      g            |
-  texts: contract 1 ✓ / break 1 / qa CON-1 · tab 2 / app · <1m
+  texts: ✓ 1 Check the contract / 1 Try to break it / qa CON-1 · tab 2 / app · <1m
   puppet 3: tab3 at 800,752 colour #A06CD5 bubble: -
   |                                                |
   |                 gggggggggggggggggggggggggggggg |
@@ -969,7 +969,7 @@
   |            g                      g            |
   |            g                      g            |
   |            g                      g            |
-  texts: contract 1 ✓ / break 1 / qa CON-1 · tab 1 / app · <1m
+  texts: ✓ 1 Check the contract / 1 Try to break it / qa CON-1 · tab 1 / app · <1m
 == after a restart, replayed from the events file
   puppet 1: tab1 at 1208,752 colour #D97757 bubble: -
   |                                                |
@@ -1022,4 +1022,4 @@
   |            g                      g            |
   |            g                      g            |
   |            g                      g            |
-  texts: contract 1 ✓ / break 1 / qa CON-1 · tab 1 / app · <1m
+  texts: ✓ 1 Check the contract / 1 Try to break it / qa CON-1 · tab 1 / app · <1m

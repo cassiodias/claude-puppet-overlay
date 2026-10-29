@@ -3,7 +3,7 @@
 
 local status = {}
 
-local REPLY_CHARS = 45
+local REPLY_CHARS, TITLE_CHARS, NAMED_AGENTS = 45, 40, 2
 
 -- 45 seconds → "<1m", 32 minutes → "32m", 65 minutes → "1h 5m".
 local function duration(seconds)
@@ -45,8 +45,10 @@ end
 
 -- The card's lines; `tab` is the terminal tab's label, or nil.
 function status.card(s, now, tab)
+  local lines = {}
+  if s.title and s.title ~= "" then lines[1] = shorten(s.title, TITLE_CHARS) end
   local where = s.folder ~= "" and s.folder or "unknown folder"
-  local lines = { tab and (where .. " · " .. tab) or where }
+  lines[#lines + 1] = tab and (where .. " · " .. tab) or where
 
   local doing
   if s.mood == "permission" then
@@ -58,12 +60,20 @@ function status.card(s, now, tab)
   else
     doing = "idle " .. duration(now - s.seenAt)
   end
-  lines[2] = s.command and ("/" .. s.command .. " · " .. doing) or doing
+  lines[#lines + 1] = s.command and ("/" .. s.command .. " · " .. doing) or doing
 
   local live, done = agentCounts(s)
   if live + done > 0 then
-    local parts = {}
-    if live > 0 then parts[#parts + 1] = live .. " working" end
+    local parts, names = {}, {}
+    for _, id in ipairs(s.order) do
+      local agent = s.agents[id]
+      if agent and not agent.done then names[#names + 1] = agent.label end
+    end
+    if live > 0 and live <= NAMED_AGENTS and #names == live then
+      parts[#parts + 1] = table.concat(names, ", ") .. " working"
+    elseif live > 0 then
+      parts[#parts + 1] = live .. " working"
+    end
     if done > 0 then parts[#parts + 1] = done .. " done" end
     lines[#lines + 1] = "subagents: " .. table.concat(parts, ", ")
   end

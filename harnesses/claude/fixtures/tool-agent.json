@@ -1,0 +1,12 @@
+{
+  "session_id": "s2",
+  "cwd": "/Users/dev/workspace/my-app",
+  "transcript_path": "harnesses/claude/fixtures/transcript/s2.jsonl",
+  "hook_event_name": "PreToolUse",
+  "tool_name": "Agent",
+  "tool_input": {
+    "description": "Review the parser's edge cases",
+    "prompt": "a long private brief that must not be kept",
+    "subagent_type": "general-purpose"
+  }
+}

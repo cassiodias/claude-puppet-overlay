@@ -52,6 +52,18 @@ check("card: idle", card[2] == "idle 5m")
 check("card: one tool call", card[3] == "1 tool call · last: Edit")
 check("card: the last reply, shortened", card[4] and #card[4] <= 60 and card[4]:match("^last reply: word") and card[4]:match("…$"))
 
+local titled = session({ isWorking = true, command = "review", title = "Shop-api PR 12 review, round two of the fixes",
+  agents = { a = { done = false, label = "QA lens contract T-42" },
+             b = { done = false, label = "QA lens break T-42" }, c = { done = true } },
+  order = { "a", "b", "c" } })
+card = status.card(titled, 1060, "tab 2")
+check("card: the title first, shortened", card[1] == "Shop-api PR 12 review, round two of the…")
+check("card: then where", card[2] == "repo · tab 2")
+check("card: the working subagents by name", card[4] == "subagents: QA lens contract T-42, QA lens break T-42 working, 1 done")
+local many = session({ agents = { a = { done = false, label = "x" }, b = { done = false, label = "y" },
+  c = { done = false, label = "z" } }, order = { "a", "b", "c" } })
+check("card: three or more working are counted", status.card(many, 1000)[3] == "subagents: 3 working")
+
 check("card: a session with no folder still says something", status.card(session({ folder = "" }), 1000)[1] == "unknown folder")
 
 check.done("status")

@@ -87,7 +87,8 @@ function Sessions:apply(e, ctx)
   if not s then
     self.joined = self.joined + 1
     s = {
-      agents = {}, order = {}, score = 0, tools = 0, isWorking = false, readingUntil = 0, summary = "", tappedAt = -100,
+      agents = {}, order = {}, queued = {}, score = 0, tools = 0, isWorking = false, readingUntil = 0, summary = "",
+      tappedAt = -100,
       joinedAt = self.joined, folder = "", tag = "", turnAt = at,
       -- A session first seen mid-turn has no prompt to judge by: it plays as the main conversation would.
       isListed = mapping.conversation ~= "off",
@@ -101,6 +102,7 @@ function Sessions:apply(e, ctx)
   if e.app ~= "" then s.app = e.app end
   if e.tty:match("^/dev/ttys%d+$") then s.tty = e.tty end
   if s.tag == "" then s.tag = s.folder end
+  if e.title and e.title ~= "" then s.title = e.title end
   local kind = harness.toolKind(e.tool)
   local function say(text, seconds) intents[#intents + 1] = { key = sid, text = text, seconds = seconds } end
 
@@ -110,7 +112,7 @@ function Sessions:apply(e, ctx)
     -- started still working) belongs to that work: it keeps the command, its animation and its subagents.
     -- Otherwise it starts a new turn.
     if command or not (s.isWorking or liveAgents(s) > 0) then
-      s.agents, s.order, s.score, s.test, s.summary = {}, {}, 0, nil, ""
+      s.agents, s.order, s.queued, s.score, s.test, s.summary = {}, {}, {}, 0, nil, ""
       s.turnAt, s.tools, s.lastTool = at, 0, nil
       s.command = command
       s.isListed = mapping:choiceFor(s.command) ~= "off"
@@ -123,6 +125,8 @@ function Sessions:apply(e, ctx)
     s.tools = s.tools + 1
     if e.tool ~= "" then s.lastTool = e.tool end
     if e.agentId ~= "" and s.agents[e.agentId] then s.agents[e.agentId].hits = s.agents[e.agentId].hits + 1 end
+    -- Starting a subagent names its job; the subagent it starts takes the name, in the order they were called.
+    if kind == "agent" and e.agentId == "" and e.text ~= "" then s.queued[#s.queued + 1] = e.text end
     -- The agent calling a listed skill starts the show mid-turn, as typing its /command does.
     if kind == "skill" and mapping:mappedScene(e.text) then
       s.isListed, s.tag, s.command = true, e.text, e.text
@@ -154,7 +158,9 @@ function Sessions:apply(e, ctx)
     s.mood, s.moodText = "permission", (e.tool ~= "" and e.tool or "OK")
     if s.isListed then say("May I use " .. s.moodText .. "?") end
   elseif e.name == "SubagentStart" and e.agentId ~= "" then
-    s.agents[e.agentId] = { label = (e.agentType ~= "" and e.agentType or "agent"):sub(1, 18), hits = 0, done = false }
+    local queued = table.remove(s.queued, 1)
+    local label = e.text ~= "" and e.text or queued or (e.agentType ~= "" and e.agentType or "agent")
+    s.agents[e.agentId] = { label = label, hits = 0, done = false }
     s.order[#s.order + 1] = e.agentId
   elseif e.name == "SubagentStop" and s.agents[e.agentId] then
     s.agents[e.agentId].done = true
