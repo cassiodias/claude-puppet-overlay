@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "~/.claude-puppet/hook.sh" }] }],
+    "PreToolUse": [{ "matcher": "*", "hooks": [{ "type": "command", "command": "~/.claude-puppet/hook.sh" }] }],
+    "SubagentStart": [{ "hooks": [{ "type": "command", "command": "~/.claude-puppet/hook.sh" }] }],
+    "SubagentStop": [{ "hooks": [{ "type": "command", "command": "~/.claude-puppet/hook.sh" }] }],
+    "Notification": [{ "hooks": [{ "type": "command", "command": "~/.claude-puppet/hook.sh" }] }],
+    "Stop": [{ "hooks": [{ "type": "command", "command": "~/.claude-puppet/hook.sh" }] }],
+    "SessionEnd": [{ "hooks": [{ "type": "command", "command": "~/.claude-puppet/hook.sh" }] }]
+  }
+}
