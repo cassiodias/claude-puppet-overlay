@@ -67,9 +67,10 @@ By default every turn plays: the coder, or ping pong while subagents run. Click 
 ```
 Coder:      my-coding-skill, my-planner  …
 Ping pong:  my-reviewer  …
-Main conversation  ▸  Coder
-                      Ping pong while subagents run, else coder
-                      Off
+Main conversation:
+      Coder
+    ✓ Ping pong while subagents run, else coder
+      Off
 ```
 
 - **Coder** and **Ping pong:** click one to type the slash commands or skills whose turns show that scene, comma separated, with or without the slash. A command is on one list only: adding it to one takes it off the other.

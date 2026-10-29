@@ -11,7 +11,7 @@ local obj = {}
 obj.__index = obj
 
 obj.name = "ClaudePuppet"
-obj.version = "0.7.0"
+obj.version = "0.7.1"
 obj.author = "Cassio Dias"
 obj.license = "MIT - https://opensource.org/licenses/MIT"
 obj.homepage = "https://github.com/cassiodias/claude-puppet-overlay"
@@ -681,21 +681,21 @@ end
 -- The menu bar menu: show or hide, the commands each scene plays for, the main conversation, and the screen.
 function obj:menuItems()
   local function listed(commands) return #commands > 0 and table.concat(commands, ", ") or "no commands yet" end
-  local conversation = {}
-  for _, choice in ipairs(CONVERSATION_CHOICES) do
-    conversation[#conversation + 1] = { title = choice[2], checked = self.conversation == choice[1], fn = function()
-      self.conversation = choice[1]
-      self:saveChoice()
-    end }
-  end
   local items = {
     { title = self.isShown and "Hide puppets" or "Show puppets", fn = function() self:toggle() end },
     { title = "-" },
     { title = "Coder:  " .. listed(self.coder) .. "  …", fn = function() self:editScene("coder") end },
     { title = "Ping pong:  " .. listed(self.pingpong) .. "  …", fn = function() self:editScene("pingpong") end },
-    { title = "Main conversation", menu = conversation },
     { title = "-" },
+    { title = "Main conversation:", disabled = true },
   }
+  for _, choice in ipairs(CONVERSATION_CHOICES) do
+    items[#items + 1] = { title = "    " .. choice[2], checked = self.conversation == choice[1], fn = function()
+      self.conversation = choice[1]
+      self:saveChoice()
+    end }
+  end
+  items[#items + 1] = { title = "-" }
   for _, screen in ipairs(hs.screen.allScreens()) do
     items[#items + 1] = { title = "Move to " .. screen:name(), fn = function() self:moveToCorner(screen) end }
   end
