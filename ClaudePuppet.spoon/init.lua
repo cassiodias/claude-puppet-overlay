@@ -11,7 +11,7 @@ local obj = {}
 obj.__index = obj
 
 obj.name = "ClaudePuppet"
-obj.version = "0.6.0"
+obj.version = "0.6.2"
 obj.author = "Cassio Dias"
 obj.license = "MIT - https://opensource.org/licenses/MIT"
 obj.homepage = "https://github.com/cassiodias/claude-puppet-overlay"
@@ -377,7 +377,6 @@ end
 -- A session that has played keeps its puppet and desk until it ends, its iTerm tab closes,
 -- or it has been silent for hours.
 local function isOnStage(s)
-  if s.isListed and (s.isWorking or s.mood ~= nil or liveAgents(s) > 0) then s.hasPlayed = true end
   return s.hasPlayed and not s.isClosed and os.time() - s.seenAt < STALE_SECONDS
 end
 
@@ -504,6 +503,7 @@ end
 --- Method
 --- Shows a speech bubble above a session's puppet; it stays until the next event, or for `seconds` when given.
 function obj:say(key, text, seconds)
+  if self.replayFrom then return end
   local puppet = self.stage[key]
   if not puppet and text and text ~= "" then
     self:layout()
@@ -546,7 +546,8 @@ function obj:handle(line)
   local f = split(line)
   local event, sid, aid, tool, atype, text, folder, app, flag, tty =
     f[2], f[3] or "", f[4] or "", f[5] or "", f[6] or "", f[7] or "", f[8] or "", f[9] or "", f[10] or "", f[11] or ""
-  if not event or sid == "" then return end
+  local at = tonumber(f[1]) or os.time()
+  if not event or sid == "" or (self.replayFrom and at < self.replayFrom) then return end
   if event == "SessionEnd" then
     self.sessions[sid] = nil
     return
@@ -562,8 +563,8 @@ function obj:handle(line)
     }
     self.sessions[sid] = s
   end
-  self.lastEventAt = os.time()
-  s.seenAt = os.time()
+  self.lastEventAt = at
+  s.seenAt = at
   if folder ~= "" then s.folder = folder end
   if app ~= "" then s.app = app end
   if tty:match("^/dev/ttys%d+$") then s.tty = tty end
@@ -624,6 +625,7 @@ function obj:handle(line)
     -- Background subagents may still be working; the last one to stop says it then.
     self:finish(sid, s)
   end
+  if s.isListed and (s.isWorking or s.mood ~= nil or liveAgents(s) > 0) then s.hasPlayed = true end
 end
 
 -- Keeps the commands and skills seen lately, newest first, for the menu to offer.
@@ -866,7 +868,10 @@ function obj:start()
   self.seen = hs.settings.get(SEEN_KEY) or {}
   self.scenes = hs.settings.get(SCENES_KEY) or {}
   self.sessions, self.stage, self.keys, self.tabs, self.iTermWindows = {}, {}, {}, {}, 0
-  self.offset = hs.fs.attributes(self.eventsFile, "size") or 0
+  -- Replays the last hours of events, without bubbles, so a restart finds every session as it was.
+  self.offset, self.replayFrom = 0, os.time() - STALE_SECONDS
+  self:readEvents()
+  self.replayFrom = nil
 
   self.menu = hs.menubar.new()
   self.menu:setTitle("▟▙")
