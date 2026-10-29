@@ -11,7 +11,7 @@ local obj = {}
 obj.__index = obj
 
 obj.name = "ClaudePuppet"
-obj.version = "0.4.1"
+obj.version = "0.4.2"
 obj.author = "Cassio Dias"
 obj.license = "MIT - https://opensource.org/licenses/MIT"
 obj.homepage = "https://github.com/cassiodias/claude-puppet-overlay"
@@ -677,9 +677,26 @@ function obj:startDrag(key)
   self.dragTap:start()
 end
 
-function obj:defaultPosition()
-  local screen = hs.screen.mainScreen():frame()
-  return { x = screen.x + screen.w - W * self.pixel - 40, y = screen.y + screen.h - H * self.pixel - 40 }
+-- The bottom right corner of a screen, the main one when none is given.
+function obj:defaultPosition(screen)
+  local frame = (screen or hs.screen.mainScreen()):frame()
+  return { x = frame.x + frame.w - W * self.pixel - 40, y = frame.y + frame.h - H * self.pixel - 40 }
+end
+
+-- Puppets left on a screen that is no longer connected come back to the main screen's corner.
+function obj:isOnAScreen(point)
+  local center = { x = point.x + W * self.pixel / 2, y = point.y + H * self.pixel / 2 }
+  for _, screen in ipairs(hs.screen.allScreens()) do
+    local f = screen:frame()
+    if center.x >= f.x and center.x < f.x + f.w and center.y >= f.y and center.y < f.y + f.h then return true end
+  end
+  return false
+end
+
+function obj:moveToCorner(screen)
+  self.anchor = self:defaultPosition(screen)
+  hs.settings.set(POSITION_KEY, self.anchor)
+  self:layout()
 end
 
 function obj:toggle()
@@ -699,6 +716,11 @@ end
 --- Shows the puppets and starts following Claude Code's events.
 function obj:start()
   self.anchor = hs.settings.get(POSITION_KEY) or self:defaultPosition()
+  if not self:isOnAScreen(self.anchor) then self.anchor = self:defaultPosition() end
+  self.screenWatcher = hs.screen.watcher.new(function()
+    if not self:isOnAScreen(self.anchor) then self:moveToCorner() end
+  end)
+  self.screenWatcher:start()
   self.frame, self.lastEventAt, self.joined, self.isShown = 0, os.time(), 0, true
   self.sessions, self.stage, self.keys, self.tabs, self.iTermWindows = {}, {}, {}, {}, 0
   self.offset = hs.fs.attributes(self.eventsFile, "size") or 0
@@ -706,14 +728,13 @@ function obj:start()
   self.menu = hs.menubar.new()
   self.menu:setTitle("▟▙")
   self.menu:setMenu(function()
-    return {
+    local items = {
       { title = self.isShown and "Hide puppets" or "Show puppets", fn = function() self:toggle() end },
-      { title = "Move to corner", fn = function()
-        hs.settings.clear(POSITION_KEY)
-        self.anchor = self:defaultPosition()
-        self:layout()
-      end },
     }
+    for _, screen in ipairs(hs.screen.allScreens()) do
+      items[#items + 1] = { title = "Move to " .. screen:name(), fn = function() self:moveToCorner(screen) end }
+    end
+    return items
   end)
 
   self.timer = hs.timer.doEvery(1 / FPS, function()
@@ -732,6 +753,7 @@ end
 function obj:stop()
   if self.timer then self.timer:stop() end
   if self.tabsTimer then self.tabsTimer:stop() end
+  if self.screenWatcher then self.screenWatcher:stop() end
   if self.dragTap then self.dragTap:stop() end
   if self.menu then self.menu:delete() end
   for key in pairs(self.stage or {}) do self:removePuppet(key) end
