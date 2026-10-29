@@ -1,8 +1,12 @@
 # Install
 
-You need macOS, [Homebrew](https://brew.sh) and Claude Code. Steps 1 to 4 are copy and paste into a terminal; step 5 is a few clicks only you can do.
+**You need:** macOS 13 or later, [Homebrew](https://brew.sh), `git` (run `xcode-select --install` if `git --version` asks for it) and Claude Code. iTerm2 is optional; with it, a click on a puppet selects its exact tab.
+
+Steps 1 to 4 are copy and paste into a terminal. Step 5 is a few clicks in macOS that no script can do for you. It takes about 5 minutes.
 
 ## 1. Install Hammerspoon
+
+[Hammerspoon](https://www.hammerspoon.org) is a free macOS automation app; it draws the puppets.
 
 ```sh
 brew install --cask hammerspoon
@@ -17,18 +21,22 @@ cp -R ~/.claude-puppet/src/ClaudePuppet.spoon ~/.hammerspoon/Spoons/
 cp ~/.claude-puppet/src/hook/claude-puppet-hook.sh ~/.claude-puppet/hook.sh
 ```
 
-## 3. Load the puppet in Hammerspoon
+This puts the source in `~/.claude-puppet/src`, the hook in `~/.claude-puppet/hook.sh` and the puppets in `~/.hammerspoon/Spoons/ClaudePuppet.spoon`. If `~/.claude-puppet/src` already exists, you installed before: follow [Update](#update) instead.
+
+## 3. Load the puppets in Hammerspoon
 
 ```sh
-cat >> ~/.hammerspoon/init.lua <<'LUA'
+grep -qs 'ClaudePuppet' ~/.hammerspoon/init.lua || cat >> ~/.hammerspoon/init.lua <<'LUA'
 hs.loadSpoon("ClaudePuppet")
 spoon.ClaudePuppet:start()
 LUA
 ```
 
+This adds two lines to `~/.hammerspoon/init.lua` (Hammerspoon's config, created if you have none), unless they are there already. Anything else in that file stays.
+
 ## 4. Connect Claude Code
 
-This puts the puppet's hooks in `~/.claude/settings.json`. It saves a backup first, keeps everything else in the file, and replaces any puppet hooks already there, so it is safe to run again:
+`jq` comes with macOS 15 and later; on macOS 13 or 14, run `brew install jq` first.
 
 ```sh
 cd ~/.claude-puppet/src
@@ -41,46 +49,48 @@ jq -s '.[0] as $mine | .[1].hooks as $add | $mine | .hooks = (reduce ($add | key
 rm /tmp/claude-puppet-clean.json
 ```
 
-`jq` comes with macOS 15 and later; on older versions run `brew install jq` first.
+This adds the puppet's hook to your user settings, `~/.claude/settings.json`, for these Claude Code events: prompt submitted, before and after each tool call, tool failure, permission request, subagent start and stop, notification, stop and session end. It saves a backup to `~/.claude/settings.json.bak` first, keeps everything else in the file (your other hooks included), and replaces any puppet hooks already there, so it is safe to run again.
 
 ## 5. Things only you can do
 
-macOS asks you for these, and no script can click them for you:
-
-1. **Open Hammerspoon:** `open -a Hammerspoon`. On the first launch it shows a setup window.
-2. **Allow Accessibility:** System Settings → Privacy & Security → **Accessibility** → turn on **Hammerspoon**. Without it you cannot drag the puppet or click it to jump to your terminal.
-3. **Allow iTerm2 control** (iTerm2 users): the first time Hammerspoon looks up your tabs, macOS asks *"Hammerspoon wants to control iTerm2"*. Click **OK**. It is how the puppets know each session's tab number and select that tab on a click. If you clicked Don't Allow, turn it on in System Settings → Privacy & Security → **Automation** → Hammerspoon → iTerm2.
-4. **Launch at login:** click the Hammerspoon icon in the menu bar → **Preferences** → tick **Launch Hammerspoon at login**. Otherwise the puppet is gone after a restart.
-5. **Reload:** click the Hammerspoon icon → **Reload Config**. A puppet appears in the bottom right corner of your main screen, with a `▟▙` icon in the menu bar to hide the puppets or send them to the corner of any of your screens. More puppets line up to its left while several Claude sessions are busy.
-6. **Start a new Claude Code session.** Sessions that were already open do not pick up the new hooks.
+1. **Open Hammerspoon:** run `open -a Hammerspoon`. It loads its config, and a puppet appears in the bottom right corner of your main screen, with a `▟▙` icon in the menu bar. On the very first launch Hammerspoon also shows a setup window.
+2. **Allow Accessibility:** System Settings → Privacy & Security → **Accessibility** → turn on **Hammerspoon**. Without it you cannot drag the puppets or click them. If Hammerspoon is listed and already on but dragging does not work, the switch belongs to an older copy of the app: select Hammerspoon, remove it with **–**, add it again with **+** (Applications → Hammerspoon), turn it on, then quit and reopen Hammerspoon.
+3. **Allow iTerm2 control** (iTerm2 only): the first time a Claude session runs in iTerm2, macOS asks *"Hammerspoon wants to control iTerm2"*. Click **OK**: it is how each puppet shows its tab number and how a click selects that tab. If you clicked Don't Allow: System Settings → Privacy & Security → **Automation** → Hammerspoon → turn on iTerm2.
+4. **Launch at login:** click the Hammerspoon icon in the menu bar → **Preferences** → tick **Launch Hammerspoon at login**. Otherwise the puppets are gone after you restart your Mac.
+5. **Start a new Claude Code session** (`claude` in a new terminal tab), so it surely reads the new hooks.
 
 ## 6. Try it
 
-Ask Claude anything in the new session. The puppet thinks, then types; when Claude finishes, it says the first sentence of the answer. Click it to jump to that terminal.
+Ask Claude anything in the new session. The puppet thinks, then types and shoots invaders; when Claude finishes, it says the first sentence of the answer. Click the puppet to jump to that terminal.
 
 To see ping pong, ask Claude for two subagents at once, for example: *"Use two subagents in parallel: one lists this folder, the other prints today's date."*
 
+Run Claude in a second tab and a second puppet, in another colour, sits down next to the first.
+
 ## Choose what plays
 
-By default every turn plays: the coder, or ping pong while subagents run. Click the `▟▙` icon in the menu bar to choose instead:
+By default every turn plays: the coder, or ping pong while subagents run. To choose, click the `▟▙` icon in the menu bar:
 
 ```
-Coder:      my-coding-skill, my-planner  …
-Ping pong:  my-reviewer  …
+Hide puppets
+Animation to Commands Mapping
+    Coder:      my-coding-skill, my-planner  …
+    Ping pong:  my-reviewer  …
 Main conversation:
       Coder
     ✓ Ping pong while subagents run, else coder
       Off
+Move to <each of your screens>
 ```
 
-- **Coder** and **Ping pong:** click one to type the slash commands or skills whose turns show that scene, comma separated, with or without the slash. A command is on one list only: adding it to one takes it off the other.
-- **Main conversation:** every other turn, like chatting with Claude or a command on neither list. **Off** keeps those turns quiet, so only your listed commands get a puppet.
+- **Coder** and **Ping pong:** click one, and type the slash commands or skills whose turns show that animation, comma separated, with or without the slash. A command is on one list only: adding it to one takes it off the other.
+- **Main conversation:** every other turn, like chatting with Claude, or a command on neither list. **Off** keeps those turns quiet, so only your listed commands get a puppet.
 
-A turn plays from when you type a listed command, or from when Claude calls a listed skill. Changes apply at once, to every tab, and Hammerspoon keeps them across restarts.
+A turn plays from when you type a listed command, or from when Claude calls a listed skill. Changes apply at once to every tab, and Hammerspoon keeps them across restarts.
 
 Menu bar icon hidden behind the notch? **Option-click any puppet** to open the same menu.
 
-If you prefer a file, set the starting choice in `~/.hammerspoon/init.lua`, before the `start()` line (the menu's choice wins once you have used it):
+If you prefer a file, set the starting choice in `~/.hammerspoon/init.lua`, before the `start()` line. Once you change the choice in the menu, the menu's choice is used instead:
 
 ```lua
 spoon.ClaudePuppet.coder = { "my-coding-skill" }
@@ -98,7 +108,11 @@ cp -R ~/.claude-puppet/src/ClaudePuppet.spoon ~/.hammerspoon/Spoons/
 cp ~/.claude-puppet/src/hook/claude-puppet-hook.sh ~/.claude-puppet/hook.sh
 ```
 
-Then run step 4 again (a new version may listen to more events), **Reload Config** in Hammerspoon, and start a new Claude Code session.
+Then:
+
+1. Run [step 4](#4-connect-claude-code) again: a new version may listen to more events.
+2. Click the Hammerspoon icon → **Reload Config**. The puppets come back where they were, with your menu choices.
+3. Start new Claude Code sessions.
 
 ## Uninstall
 
@@ -107,13 +121,18 @@ cp ~/.claude/settings.json ~/.claude/settings.json.bak
 jq '.hooks |= ((. // {}) | with_entries(.value |= map(select(all(.hooks[]; .command | test("claude-puppet") | not)))) | with_entries(select(.value | length > 0)))' \
   ~/.claude/settings.json > /tmp/claude-puppet-clean.json && mv /tmp/claude-puppet-clean.json ~/.claude/settings.json
 rm -rf ~/.hammerspoon/Spoons/ClaudePuppet.spoon ~/.claude-puppet
+defaults delete org.hammerspoon.Hammerspoon ClaudePuppet.choice 2>/dev/null
+defaults delete org.hammerspoon.Hammerspoon ClaudePuppet.position 2>/dev/null
 ```
 
-Then delete the `ClaudePuppet` lines from `~/.hammerspoon/init.lua` and **Reload Config**. Hammerspoon itself stays; `brew uninstall --cask hammerspoon` removes it too, and you can turn its Accessibility switch off in System Settings.
+This removes the puppet's hooks from your Claude Code settings (keeping a backup), its files, and the menu choices and position Hammerspoon kept for it. Then delete the two `ClaudePuppet` lines from `~/.hammerspoon/init.lua` and click **Reload Config**.
+
+Hammerspoon itself stays: `brew uninstall --cask hammerspoon` removes it, and you can turn its Accessibility and Automation switches off in System Settings.
 
 ## If something does not work
 
-- **The puppet does not move:** run `tail -f ~/.claude-puppet/events` while Claude works. A line per event means the hook runs and the problem is on the Hammerspoon side: open **Console** from its menu bar icon to see errors. No lines: start a new Claude Code session, and check that `/hooks` in Claude Code lists `~/.claude-puppet/hook.sh`.
-- **Cannot drag or click it:** Accessibility is off for Hammerspoon (step 5.2). After turning it on, quit and reopen Hammerspoon.
+- **No puppet at all:** click the Hammerspoon icon → **Console**. A red line names the problem; a common one is a typo in `~/.hammerspoon/init.lua`.
+- **The puppet does not move while Claude works:** run `tail -f ~/.claude-puppet/events`. A line per event means the hook runs and the problem is on the Hammerspoon side (see Console). No lines: start a new Claude Code session, and check that `/hooks` in Claude Code lists `~/.claude-puppet/hook.sh`.
+- **Cannot drag or click it:** Accessibility, step 5.2, including the remove-and-add-again fix.
 - **No tab number, or a click does not reach the right tab:** in iTerm2, check the Automation switch (step 5.3). Inside tmux or Zellij the puppet cannot see iTerm's tab, so it falls back to the next rule.
 - **A click does not reach the right window:** outside iTerm2 the puppet knows Terminal, Ghostty, WezTerm, Warp, VS Code, Hyper, Tabby and Zed. It brings the app forward and picks the window whose title has the project folder's name; in other terminals a click does nothing.

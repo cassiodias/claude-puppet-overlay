@@ -11,7 +11,7 @@ local obj = {}
 obj.__index = obj
 
 obj.name = "ClaudePuppet"
-obj.version = "0.7.1"
+obj.version = "0.7.2"
 obj.author = "Cassio Dias"
 obj.license = "MIT - https://opensource.org/licenses/MIT"
 obj.homepage = "https://github.com/cassiodias/claude-puppet-overlay"
@@ -684,8 +684,9 @@ function obj:menuItems()
   local items = {
     { title = self.isShown and "Hide puppets" or "Show puppets", fn = function() self:toggle() end },
     { title = "-" },
-    { title = "Coder:  " .. listed(self.coder) .. "  …", fn = function() self:editScene("coder") end },
-    { title = "Ping pong:  " .. listed(self.pingpong) .. "  …", fn = function() self:editScene("pingpong") end },
+    { title = "Animation to Commands Mapping", disabled = true },
+    { title = "    Coder:  " .. listed(self.coder) .. "  …", fn = function() self:editScene("coder") end },
+    { title = "    Ping pong:  " .. listed(self.pingpong) .. "  …", fn = function() self:editScene("pingpong") end },
     { title = "-" },
     { title = "Main conversation:", disabled = true },
   }
